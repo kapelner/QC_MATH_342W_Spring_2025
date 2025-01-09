@@ -75,22 +75,22 @@ My theory lectures are following my previous class notes (see [here](https://git
 * Midterm I - Omit topics we did not cover
 
 [(practice exam 1)](https://github.com/kapelner/QC_Math_342W_Spring_2024/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2024/blob/master/exams/midterm1/midterm1_solutions.pdf)\
-[(practice exam 2](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm1/midterm1_solutions.pdf)\
-[(practice exam 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1_solutions.pdf)\
-[(practice exam 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1_solutions.pdf)\
-[(practice exam 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1_solutions.pdf)\
-[(practice exam 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1_solutions.pdf)
+[(practice exam 2](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm1/midterm1_solutions.pdf)\
+[(practice exam 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1_solutions.pdf)\
+[(practice exam 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1_solutions.pdf)\
+[(practice exam 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1_solutions.pdf)\
+[(practice exam 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1_solutions.pdf)
 
 
 * Midterm II - Omit topics we did not cover
 
 [(practice exam 1)](https://github.com/kapelner/QC_Math_342W_Spring_2024/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2024/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 2)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2_solutions.pdf)\
-[(practice exam 7)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final.pdf) [(practice exam solutions 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final_solutions.pdf)
+[(practice exam 2)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_342W_Spring_2022/blob/master/exams/midterm2/midterm2_solutions.pdf)\
+[(practice exam 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2_solutions.pdf)\
+[(practice exam 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2_solutions.pdf)\
+[(practice exam 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 5)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2_solutions.pdf)\
+[(practice exam 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 6)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2_solutions.pdf)\
+[(practice exam 7)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final.pdf) [(practice exam solutions 7)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final_solutions.pdf)
 
 
 ## Office Hours
@@ -102,7 +102,7 @@ Time / Location: Tues and Thurs, 7:55-8:20PM / KY 061
 
 ## The Teaching Assistants
 
-* Bryan Nevarez will hold recitation section in-person on Tuesdays and Thursdays 5-5:40PM in our classroom, KY 258
+* Bryan Nevarez will hold recitation sections in-person on Tuesdays and Thursdays, 5-5:40PM in KY 258
 * Tao Wu will hold recitation section [in a dedicated zoom room](https://us02web.zoom.us/j/82840450276?pwd=t2F9RidFuflecTO61Crj42ZeWaEWop.1) on Fridays 10-11AM
 
 ## Grades and Class Standing
