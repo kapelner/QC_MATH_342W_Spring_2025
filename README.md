@@ -103,7 +103,7 @@ Time / Location: Tues and Thurs, 7:55-8:20PM / KY 061
 ## The Teaching Assistants
 
 * Bryan Nevarez will hold recitation section in-person on Tuesdays and Thursdays 5-5:40PM in our classroom, KY 258
-* Tao Wu will hold recitation section on zoom on Fridays 10-11AM
+* Tao Wu will hold recitation section [in a dedicated zoom room](https://us02web.zoom.us/j/82840450276?pwd=t2F9RidFuflecTO61Crj42ZeWaEWop.1) on Fridays 10-11AM
 
 ## Grades and Class Standing
 
