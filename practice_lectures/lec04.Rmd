@@ -1,0 +1,178 @@
+---
+title: "Practice Lecture 4 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+---
+
+
+## First modeling exercise
+
+Rebuild the data frame, now with proper data types except for "has_past_unpaid_loan" which we will fix in a minute:
+
+```{r}
+set.seed(1)
+n = 100
+ordered_crime_levels = c("no crime", "infraction", "misdemeanor", "felony")
+X = data.frame(
+  salary = round(rnorm(n, 50000, 20000)),
+  has_past_unpaid_loan = rbinom(n, size = 1, prob = 0.2),
+  past_crime_severity = factor(sample(
+      ordered_crime_levels,
+      size = n,
+      replace = TRUE,
+      prob = c(.50, .40, .08, .02)
+    ), 
+    ordered = TRUE, 
+    levels = ordered_crime_levels
+  )
+)
+fake_first_names = c(
+  "Sophia", "Emma", "Olivia", "Ava", "Mia", "Isabella", "Riley", 
+  "Aria", "Zoe", "Charlotte", "Lily", "Layla", "Amelia", "Emily", 
+  "Madelyn", "Aubrey", "Adalyn", "Madison", "Chloe", "Harper", 
+  "Abigail", "Aaliyah", "Avery", "Evelyn", "Kaylee", "Ella", "Ellie", 
+  "Scarlett", "Arianna", "Hailey", "Nora", "Addison", "Brooklyn", 
+  "Hannah", "Mila", "Leah", "Elizabeth", "Sarah", "Eliana", "Mackenzie", 
+  "Peyton", "Maria", "Grace", "Adeline", "Elena", "Anna", "Victoria", 
+  "Camilla", "Lillian", "Natalie", "Jackson", "Aiden", "Lucas", 
+  "Liam", "Noah", "Ethan", "Mason", "Caden", "Oliver", "Elijah", 
+  "Grayson", "Jacob", "Michael", "Benjamin", "Carter", "James", 
+  "Jayden", "Logan", "Alexander", "Caleb", "Ryan", "Luke", "Daniel", 
+  "Jack", "William", "Owen", "Gabriel", "Matthew", "Connor", "Jayce", 
+  "Isaac", "Sebastian", "Henry", "Muhammad", "Cameron", "Wyatt", 
+  "Dylan", "Nathan", "Nicholas", "Julian", "Eli", "Levi", "Isaiah", 
+  "Landon", "David", "Christian", "Andrew", "Brayden", "John", 
+  "Lincoln"
+)
+rownames(X) = fake_first_names
+X
+```
+
+RStudio gives us a nicer rendering of the information. You can open it up in a separate tab via:
+
+```{r}
+View(X)
+```
+
+and you can view summaries of each feature and data type of each feature via
+
+```{r}
+summary(X)
+str(X)
+```
+
+Again, summary defaults the binary variable "has_past_unpaid_loan" as numeric. We should convert it to factor and try again. Note the "$" operator which is now valid for data.frame objects. It's a getter and a setter!
+
+```{r}
+X$has_past_unpaid_loan = factor(X$has_past_unpaid_loan, labels = c("Never", ">=1"))
+summary(X) #much better now!
+```
+
+Here's an even snazzier way of summarizing a data frame:
+
+```{r}
+pacman::p_load(skimr)
+skim(X)
+```
+
+Now that we have two categorical variables, we can do a "cross tab":
+
+```{r}
+table(X$has_past_unpaid_loan)
+table(X$past_crime_severity)
+table(X$has_past_unpaid_loan, X$past_crime_severity) / 100
+#to avoid needing the "X$" over and over, use the convenience "with"
+with(X,
+  table(has_past_unpaid_loan, past_crime_severity)
+)
+```
+Here is a fancier table using a library. Any Stata fans out there?
+
+```{r}
+pacman::p_load(gmodels)
+CrossTable(X$has_past_unpaid_loan, X$past_crime_severity, chisq = TRUE)
+```
+
+In our training set D, we are missing one final variable, the response! Let's generate it and say that 90\% of people are creditworthy i.e. they paid back their loan. Note the "$" operator is a getter and a setter and used here as a setter.
+
+```{r}
+X$paid_back_loan = factor(rbinom(n, size = 1, prob = 0.9), labels = c("No", "Yes"))
+```
+
+Conceptually - why does this make no sense at all??? y is independent of X --- what happens then? No function f can ever have any predictive / explanatory power! This is just a silly example to show you the data types. We will work with real data soon. Don't worry.
+
+Note that our matrix is now no longer just $X$; it includes $y$. I could make a renamed copy, but I want to show off dropping this column and create a new object that's both features and response column-binded together:
+
+```{r}
+y = X$paid_back_loan
+X$paid_back_loan = NULL #drop column
+Xy = cbind(X, y) #an aside: what do you think the "rbind" function does?
+head(Xy) #make sure that worked
+summary(Xy) #much better now!
+```
+I prefer calling the full training set { X, y}$ a data frame called $Xy$. 
+
+The object  is now extraneous, so we should clean up our workspace now. This deletes everything but the Xy object:
+
+```{r}
+rm(list = setdiff(ls(), "Xy"))
+```
+
+
+## The Null Model
+
+```{r}
+#There's no standard R function for sample mode!!!
+sample_mode = function(data){
+  mode_name = names(sort(-table(data)))[1]
+  switch(class(data),
+    factor = factor(mode_name, levels = levels(data)),
+    numeric = as.numeric(mode_name),
+    integer = as.integer(mode_name),
+    mode_name
+  )
+}
+
+g0 = function(){
+  sample_mode(Xy$paid_back_loan) #return mode regardless of x
+} 
+
+g0()
+```
+
+
+## The Threshold Model
+
+Let's compute the threshold model and see what happens. Here's an inefficent but quite pedagogical way to do this:
+
+```{r}
+n = nrow(Xy)
+num_errors_by_parameter = matrix(NA, nrow = n, ncol = 2)
+colnames(num_errors_by_parameter) = c("threshold_param", "num_errors")
+y_logical = Xy$paid_back_loan == "Yes"
+for (i in 1 : n){
+  threshold = Xy$salary[i]
+  num_errors = sum((Xy$salary > threshold) != y_logical)
+  num_errors_by_parameter[i, ] = c(threshold, num_errors)
+}
+num_errors_by_parameter
+
+#look at all thresholds in order
+num_errors_by_parameter[order(num_errors_by_parameter[, "num_errors"]), ]
+
+#now grab the smallest num errors
+best_row = order(num_errors_by_parameter[, "num_errors"])[1]
+x_star = c(num_errors_by_parameter[best_row, "threshold_param"], use.names = FALSE)
+x_star
+```
+
+Let's program `g`, the model that is shipped as the prediction function for future `x_*`
+
+```{r}
+g = function(x){
+  factor(ifelse(x > x_star, "Yes", "No"), levels = c("Yes", "No"))
+} 
+
+g(10000)
+g(50000)
+```
+

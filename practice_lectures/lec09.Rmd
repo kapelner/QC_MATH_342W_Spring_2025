@@ -1,0 +1,55 @@
+---
+title: "Practice Lecture 9 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+---
+
+## ANCOVA
+
+Now let's create a linear model using one categorical predictor and one continuous predictor. The combination is called for historical reasons "Analysis of Covariance" or "ANCOVA" for short.
+
+Let's use `Type` and `Horsepower`:
+
+```{r}
+ancova_mod = lm(Price ~ Type + Horsepower, cars)
+coef(ancova_mod)
+summary(ancova_mod)$r.squared
+summary(ancova_mod)$sigma
+```
+
+Interpretation of estimated coefficients? Why did $R^2$ increase?.
+
+What's going on the design / model matrix?
+
+```{r}
+head(model.matrix(Price ~ Type + Horsepower, cars))
+```
+
+Same as model matrix with just `Type`. Since `Horsepower` is continuous, it doesn't get dummified to more features.
+
+What if we went back to the `Type` regression, left out the intercept, dummified and added the intercept back in?
+
+```{r}
+Xmm = model.matrix(Price ~ 0 + Type, cars)
+Xmm = cbind(1, Xmm)
+head(Xmm,20)
+```
+
+Are the columns linearly independent? No ... so when we try to get the hat matrix,
+
+```{r}
+Xmm %*% solve(t(Xmm) %*% Xmm) %*% t(Xmm)
+```
+
+You can't invert a non-invertible matrix!!
+
+What does R do when using the linear model function:
+
+```{r}
+coef(lm(cars$Price ~ 0 + Xmm))
+```
+
+SOMEHOW: it doesn't complain since it handles the non-invertibility but we do see that the coefficients are busted in some way. Look at the coefficients! One is missing! What is R doing?? 
+
+It's just arbitrarily dropping one (just like we recommended).
+
+

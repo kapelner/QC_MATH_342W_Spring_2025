@@ -1,0 +1,40 @@
+---
+title: "Practice Lectures Week 12 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+date: "May 9, 2022"
+---
+
+
+
+
+#RF with many features
+
+How about RF?
+
+```{r}
+rf_mod = YARF(data.frame(X_train), y_train, num_trees = 500, calculate_oob_error = FALSE)
+rmse_rf = sd(y_test - predict(rf_mod, data.frame(X_test)))
+
+cat("RF advantage over OLS:", round((rmse_ols - rmse_rf) / rmse_ols * 100, 1), "%\n")
+```
+
+Takes a very long time to build - why? Amazingly, RF does very well. Why? How it able to not get confused by the junk features? It might be because the real features have a slight SSE edge. I think RF will do poorly if p > n. Maybe a lab exercise?
+
+How about just the RF on the lasso-picked variables? We can delete the intercept since RF doesn't need it.
+
+```{r}
+variables_selected = names(b_lasso[b_lasso != 0])
+variables_selected = variables_selected[-1]
+X_train_sub = data.frame(X_train)[, variables_selected]
+X_test_sub = data.frame(X_test)[, variables_selected]
+
+rf_mod = YARF(X_train_sub, y_train, num_trees = 500, mtry = 2, calculate_oob_error = FALSE)
+rmse_rf = sd(y_test - predict(rf_mod, X_test_sub))
+
+cat("RF var selected advantage over OLS:", round((rmse_ols - rmse_rf) / rmse_ols * 100, 1), "%\n")
+```
+
+Why is that better than lasso? Because lasso is linear and in RF you get a bit of juice from the non-linearities and interactions. Why is it very slightly better than RF on the full data set? Because variable selection is a good "pre-step" to do sometimes. This is why in the real world there's usually a "pipeline" that cleans data, then variable selects, then fits model then validates.
+
+
+
