@@ -66,6 +66,8 @@ Here's some R code commented:
 
 Everything beyond the "#" is a comment as is ignored during interpretation.
 
+What's that "[1]" to the left of the 5? That's actually saying the first element of the result vector is 5. Every scalar in R is a vector of size one. This is very different in other languages that have "primitive" types like int, double in C/C++/Java. Here everything is automatically an int vector or double vector.
+
 Let's start by using R as a calculator
 
 ```{r}
@@ -389,7 +391,7 @@ x[Inf]
 x[4]
 ```
 
-Now let's look at data types again. These types are the data types we learned in class.
+Now let's look at data types again. These types are the data types we learned / will learn in class.
 
 ```{r}
 x = c(1, 2, 3, 4, 5)
@@ -424,7 +426,7 @@ Data which is of class factor can be used in mathematical models that we build j
 
 ## Conditional statements and looping
 
-We will now learn how to program in R.
+We will now learn how to use program control in R.
 
 # Conditional Statements (and ways to print to screen too).
 
@@ -469,7 +471,7 @@ There is also a switch in R. It is _not_ an official keyword (despite RStudio's 
 
 ```{r}
 ch = "two"
-# ch = c("one", "two")
+#ch = c("one", "two") #switch is not vectorized (ironic since everything else in R is vectorized)
 switch(ch,
    "one" = 1,
    "two" = 2,
@@ -527,7 +529,7 @@ for (ch in vec){
 }
 ```
 
-There is also the while loop but not a "do-while" loop
+There is also the while loop.
 
 ```{r}
 x = 1
@@ -563,6 +565,8 @@ repeat {
 }
 ```
 
+Note: there is not a "do-while" loop in R. Sorry.
+
 The final control keyword tells the loop to break the current iteration but continue to the next:
 
 ```{r}
@@ -581,7 +585,7 @@ for (x in xs){
 tot
 ```
 
-Note: "real" R programmers avoid loops since they are slow. Instead they use the "apply" function (but not "sapply" or "lapply" which are not faster). We will cover these in the future. The latest trend is to use in-line C++ code (we will get to this).
+Note: "real" R programmers avoid loops since they are slow. Instead they use the "apply" function (but not "sapply" or "lapply" which are not faster). We will cover these in the future. The latest trend is to use in-line C++ code (we will get to this in the middle of the semester).
 
 ## Randomness and Realizing Random Variables
 
@@ -621,7 +625,7 @@ x
 ?rnorm
 ```
 
-Randomness is an illustion in a computer. This is a whole topic in and of itself. But for our purposes, imagine random numbers being generated from a long but fixed list of numbers and the starting point is random. But you can make the randomness deterministic by setting the starting point. Then it's just the same numbers in the same order! This starting point is called a "seed" and it's an integer. 
+Randomness is an illusion inside the computers we are using now. This is a whole topic in and of itself. But for our purposes, imagine random numbers being generated from a long but fixed list of numbers and the starting point is random. But you can make the randomness deterministic by setting the starting point. Then it's just the same numbers in the same order! This starting point is called a "seed" and it's an integer. 
 
 ```{r}
 set.seed(1984)
@@ -648,5 +652,6 @@ x
 sort(x)
 sort(x, decreasing = TRUE)
 ```
+
 
 
