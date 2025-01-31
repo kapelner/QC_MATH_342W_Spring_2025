@@ -2,7 +2,9 @@
 
 This is the course homepage for Math 342W (and Masters level 642 and RM 742) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/syllabus/syllabus.pdf). We use this [discord channel](https://discord.com/channels/1324190860023431248) for class announcements and discussions. 
 
-We will use github and [git](https://en.wikipedia.org/wiki/Git) for sharing code from this repository which you will edit then push to your own repository in order to hand in assignments. Instructions for setting up github and git, pulling this repository and creating your own repository can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/syllabus/git_github_class_setup.pdf) for MAC, Windows and Linux.
+## Setting up git and github to Submit Assignments
+
+We will use github and git for sharing code from this repository which you will edit then push to your own repository in order to hand in assignments. Instructions for setting up github and git, pulling this repository and creating your own repository can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/syllabus/git_github_class_setup.pdf) for MAC, Windows and Linux.
 
 ## Lectures
 
