@@ -62,7 +62,7 @@ Is this answer *exactly* correct?
 Create the sequence `x = [log_3(Inf), log_3(100), log_3(98), ... log_3(-20)]`.
 
 ```{r}
-x = log(c(Inf, seq(100, -20, by = -2)), base = 3)
+#TO-DO
 ```
 
 Comment on the appropriateness of the non-numeric values NAN and -Inf.
@@ -88,10 +88,7 @@ Comment on the appropriateness of the non-numeric values NAN and -Inf.
 * Locate the indices of the min and max in this vector. Hint: use the `which.min` and `which.max` functions.
 
 ```{r}
-x_within_infs = ifelse(is.infinite(x), NA, x)
-which.min(x_within_infs)
-which.max(x_within_infs)
-rm(x_within_infs)
+#TO-DO
 ```
 
 * Count the number of unique values in `x`.
@@ -106,11 +103,15 @@ rm(x_within_infs)
 #TO-DO
 ```
 
-* Cast `x` to integers. What do we learn about R's infinity representation in the integer data type?
+* Cast `x` to integers. 
   
 ```{r}
 #TO-DO
 ```
+
+What did we learn about R's infinity representation in the integer data type?
+
+#TO-DO
 
 * Use `x` to create a new vector `y` containing only the real numbers in x.
 
@@ -224,7 +225,7 @@ rm(x_within_infs)
 #TO-DO
 ```
 
-* Create a function `flip_matrix` which takes as required input a matrix, an argument `dim_to_rev` that returns the matrix with the rows in reverse order or the columns in reverse order depending on the `dim_to_rev` argument. Let the default be the dimension of the matrix that is greater. If the number of rows 
+* Create a function `flip_matrix` which takes as required input a matrix, an argument `dim_to_rev` that returns the matrix with the rows in reverse order or the columns in reverse order depending on the `dim_to_rev` argument. Let the default be the dimension of the matrix that is greater. If the number of rows and cols are equal, default to reversing its rows.
 
 ```{r}
 #TO-DO
