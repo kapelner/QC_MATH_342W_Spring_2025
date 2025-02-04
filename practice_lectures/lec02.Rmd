@@ -1,7 +1,7 @@
 ---
 title: "Practice Lecture 2 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
-date: "Jan 30, 2025"
+date: "Jan 30"
 ---
 
 ## The Matrix Data Type
@@ -500,61 +500,4 @@ tot
 ```
 
 The recommended thing to do of course is to query if it is non-numeric within the function `my_vector_sum` and cast it then. Possibly create an argument toggling this behavior on/off with a default of off.
-
-
-## Matrix operations in R
-
-R can do all the standard matrix operations. Let's go through them quickly. First initialize two example matrices:
-
-```{r}
-A = matrix(rep(1, 4), nrow = 2)
-A
-B = array(seq(1, 4), dim = c(2, 2))
-B
-I = diag(2) #create an identity matrix of size 2x2
-I
-```
-
-Now we show off some operations:
-
-```{r}
-A * B #element-wise multiplication
-A %*% B #matrix multiplication
-B %*% I
-t(B) #transpose
-solve(B)
-solve(A) #BOOM - why?
-
-#alternative method - to be wrapped in a function
-tryCatch(
-  {
-    solve(A)
-  },
-  error = function(e){
-    print("matrix not invertible, doing Moore-Penrose generalized pseudoinverse instead...")
-    MASS::ginv(A)
-  }
-)
-
-#how would you wrap this and handle it in the real world?
-solve(I)
-#rank(A) = 1 #no such function... but... there are tons of add-on libraries for matrix computations e.g.
-pacman::p_load(Matrix) #load the Matrix library
-rankMatrix(B)
-rankMatrix(A)
-rankMatrix(I)
-```
-
-Note that vectors and matrices are not the same:
-
-```{r}
-v = c(1, 2, 3) #3-d vector
-t(v) #converts to 1x3 vector... unsure why
-t(t(v))
-v %*% v #seems to default to dot product
-t(v) %*% t(t(v)) #dot product
-I = diag(3)
-I %*% v #seems to default correctly!
-I %*% t(v) #actually non-comformable
-```
 
