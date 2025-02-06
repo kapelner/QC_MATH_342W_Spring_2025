@@ -305,6 +305,10 @@ g(1000)
 ```
 
 
+
+
+
+
 ## Matrix operations in R
 
 R can do all the standard matrix operations. Let's go through them quickly. First initialize two example matrices:
@@ -360,3 +364,120 @@ I = diag(3)
 I %*% v #seems to default correctly!
 I %*% t(v) #actually non-comformable
 ```
+
+## The Perceptron
+
+Interesting history. Goes back to 1943:
+
+https://scholar.google.com/scholar?hl=en&as_sdt=7%2C39&q=A+Logical+Calculus+of+Ideas+Immanent+in+Nervous+Activity&btnG=
+
+First demonstrated in a vacuum-tube computer in 1957:
+
+https://scholar.google.com/scholar?hl=en&as_sdt=7%2C39&q=The+Perceptron%E2%80%94a+perceiving+and+recognizing+automaton&btnG=
+
+And popularized in 1958:
+
+https://scholar.google.com/scholar?hl=en&as_sdt=7%2C39&q=Rosenblatt%2C+F.+%281958%29.+%22The+perceptron%3A+A+probabilistic+model+for+information+storage+and+organization+in+the+brain&btnG=
+
+Time for some new data first... we are bored of the fabricated creditworthiness data.
+
+```{r}
+Xy = na.omit(MASS::biopsy) #The "breast cancer" data
+?MASS::biopsy
+head(Xy)
+X = Xy[, 2 : 10] #V1, V2, ..., V9
+head(X)
+y_binary = as.numeric(Xy$class == "malignant")
+table(y_binary)
+```
+
+First question. Let $\mathcal{H}$ be the set $\{0, 1\}$ meaning $g = 0$ or $g = 1$. What are the error rates then on $\mathbb{D}$? 
+
+```{r}
+#If always 0, all the 1's are errors
+239 / (444 + 239)
+#If always 1, all the 0's are errors
+444 / (444 + 239)
+
+sample_mode = function(data){
+  mode_val = names(sort(-table(data)))[1]
+  switch(class(data),
+    factor = factor(mode_val, levels = levels(data)),
+    numeric = as.numeric(mode_val),
+    integer = as.integer(mode_val),
+    mode_val
+  )
+}
+
+g0 = function(){
+  sample_mode(y_binary) #return mode regardless of x's
+} 
+
+g0()
+```
+
+If your $g$ can't beat that, either your features $x_1, \ldots, x_p$ are terrible, and/or $\mathcal{H}$ was a terrible choice and/or $\mathcal{A}$ can't pull its weight.
+
+Okay... back to the "perceptron learning algorithm". Let's use the code from lab. I've added a warning if it didn't converge. And a verbose option to print out the iterations. And a casting to matrix.
+
+```{r}
+perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w_0 = NULL, verbose = FALSE){
+  p = ncol(Xinput)
+  n = nrow(Xinput)
+  Xinput = as.matrix(cbind(1, Xinput))
+  if (is.null(w_0)){
+    w_0 = rep(0, p + 1)
+  }
+  w_prev = w_0
+  w = w_0
+  for(iter in 1 : MAX_ITER){
+    if (verbose & iter %% 10 == 0){
+      cat("  perceptron iteration:", iter, "\n")
+    }
+    for (i in 1 : n) {
+      x_i = Xinput[i,]
+      y_hat_i = ifelse(sum(w_prev * x_i) >= 0, 1, 0)
+      w = w + (y_binary[i] - y_hat_i) * x_i
+    }
+    if (identical(w, w_prev)){
+      break
+    }
+    if (iter == MAX_ITER){
+      warning("Perception did not converge in ", MAX_ITER, " iterations.")
+    }
+    w_prev = w
+  }
+  w
+}
+```
+
+Let's do so for one dimension - just "V1" in the breast cancer data. You will do an example with more features for the lab.
+
+```{r}
+X1 = X[, 1, drop = FALSE]
+w_vec = perceptron_learning_algorithm(X1, y_binary)
+w_vec
+```
+
+It didn't converge. But it returned something... What is the error rate?
+
+```{r}
+yhat = ifelse(as.matrix(cbind(1, X1)) %*% w_vec > 0, 1, 0)
+sum(y_binary != yhat) / length(y_binary)
+```
+
+Looks like the perceptron fit to just the first feature beat the null model (at least on the data in $\mathbb{D}$). Is this expected? Yes if the first feature is at all predictive of `y`. Not bad considering it wasn't designed to even handle non-linearly separable datasets!
+
+Let's try all features
+
+```{r}
+w_vec = perceptron_learning_algorithm(X, y_binary, verbose = TRUE)
+w_vec
+yhat = ifelse(as.matrix(cbind(1, X)) %*% w_vec > 0, 1, 0)
+sum(y_binary != yhat) / length(y_binary)
+```
+
+Still not bad. Even though the dataset is not linearly separable, the perceptron algorithm still "travels in the right direction".
+
+Nobody really uses perceptrons because we've invented way better algorithms (it's not only due to this linear separability problem).
+
