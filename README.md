@@ -8,35 +8,7 @@ We will use github and git for sharing code from this repository which you will 
 
 ## Lectures
 
-My theory lectures are following my previous class notes (see [here](https://github.com/kapelner/QC_Math_342W_Spring_2022)) unless specified otherwise. "Practice lectures" which consist of demos in the [R language](https://www.r-project.org/) are below:
-
-<!--
-* Practice Lecture 24 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec24.Rmd)
-* Lecture 24 [(Notes)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/lectures/lec24kap.pdf)
-* Practice Lecture 23 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec23.Rmd)
-* Lecture 23 [(Notes)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/lectures/lec23kap.pdf)
-* Practice Lecture 22 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec22.Rmd)
-* Practice Lecture 21 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec21.Rmd)
-* Practice Lecture 20 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec20.Rmd)
-* Practice Lecture 19 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec19.Rmd)
-* Practice Lecture 18 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec18.Rmd)
-* Practice Lecture 17 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec17.Rmd)
-* Practice Lecture 16 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec16.Rmd)
-* Practice Lecture 15 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec15.Rmd)
-* Practice Lecture 14 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec14.Rmd)
-* Practice Lecture 13 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec13.Rmd)
-* Practice Lecture 12 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec12.Rmd)
-* Practice Lecture 11 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec11.Rmd)
-* Practice Lecture 10 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec10.Rmd)
-* Practice Lecture 9 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec09.Rmd)
-* Practice Lecture 8 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec08.Rmd)
-* Practice Lecture 7 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec07.Rmd)
-* Practice Lecture 6 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec06.Rmd)
-* Lecture 6 [(Notes)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/lectures/lec06kap.pdf)
-* Practice Lecture 4 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec04.Rmd)
-* Practice Lecture 3 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec03.Rmd)
-* Practice Lecture 2 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec02.Rmd)-->
-* Practice Lecture 1 [(markdown)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/practice_lectures/lec01.Rmd)
+My theory lectures are following my previous class notes (see [here](https://github.com/kapelner/QC_Math_342W_Spring_2022)) unless specified otherwise. "Practice lectures" which consist of demos in the [R language](https://www.r-project.org/) change year-to-year and are found in this repository [here](https://github.com/kapelner/QC_MATH_342W_Spring_2025/tree/main/practice_lectures) and are numbered by the lecture number. Note that some lectures do not have demos.
 
 ## Labs
 
@@ -59,8 +31,8 @@ My theory lectures are following my previous class notes (see [here](https://git
 <!-- 
 * Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf) (due 5/15 pushed to your github repo)
 * Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf) (due 4/14 pushed to your github repo)
-* Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf) (due 3/17 pushed to your github repo)
-* Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf) (due 2/25 pushed to your github repo)-->
+* Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf) (due 3/17 pushed to your github repo)-->
+* Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf) (due 2/26 pushed to your github repo)
 * Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw01/hw01t.pdf) (due noon 2/7 pushed to your github repo)
 
 ## Writing Assignments
