@@ -2,7 +2,7 @@
 title: "Lab 3 MATH 342W"
 author: "Your Name Here"
 output: pdf_document
-date: "5PM February 18"
+date: "11:59PM February 16"
 ---
 
 

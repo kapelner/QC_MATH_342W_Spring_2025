@@ -20,8 +20,8 @@ My theory lectures are following my previous class notes (see [here](https://git
 * [Lab 7, due 4/1](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab07.Rmd) pushed to your github repo 
 * [Lab 6, due 3/24](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab06.Rmd) pushed to your github repo
 * [Lab 5, due 3/12](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab05.Rmd) pushed to your github repo
-* [Lab 4, due 3/3](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab04.Rmd) pushed to your github repo 
-* [Lab 3, due 2/18](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab03.Rmd) pushed to your github repo-->
+* [Lab 4, due 3/3](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab04.Rmd) pushed to your github repo -->
+* [Lab 3, due 2/16](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab03.Rmd) pushed to your github repo
 * [Lab 2, due 2/9](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab02.Rmd) pushed to your github repo
 * [Lab 1, due 2/2](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab01.Rmd) pushed to your github repo
 
