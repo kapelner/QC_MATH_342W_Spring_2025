@@ -426,22 +426,6 @@ You can now clear the workspace.
 rm(list = ls())
 ```
 
-Create a dataset D which we call `Xy` such that the linear model has R^2 about 50\% and RMSE approximately 1.
-
-```{r}
-x = #TO-DO
-y = #TO-DO
-Xy = data.frame(x = x, y = y)
-```
-
-Extra credit but required for 650 students: create a dataset D and a model that can give you R^2 arbitrarily close to 1 i.e. approximately 1 - epsilon but RMSE arbitrarily high i.e. approximately M.
-
-```{r}
-epsilon = 0.01
-M = 1000
-#TO-DO
-```
-
 
 
 
