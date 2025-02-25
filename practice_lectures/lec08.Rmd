@@ -3,16 +3,6 @@ title: "Practice Lecture 8 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 ---
 
-# Predictions with linear models in R
-
-After the model is fit, you may want to predict with it using the $g$ function. Of course R can do this:
-
-```{r}
-predict(simple_linear_model, data.frame(Horsepower = 200)) 
-#i.e. yhat = g(400)
-predict(simple_linear_model, data.frame(Horsepower = c(200, 300, 500))) 
-#i.e. the yhat vector = [g(200), g(300), g(500)]
-```
 
 ##Simple regression with nominal variables
 
@@ -26,11 +16,14 @@ table(cars$Origin)
 We can plot how this looks:
 
 ```{r}
+pacman::p_load(ggplot2)
 ggplot(cars, aes(Origin, Price)) + 
   geom_point()
 ```
 
-And now, we can do an OLS (ordinary least squares) fit:
+
+
+Now let's so a simple ANOVA model (i.e., one feature which is categorical)
 
 ```{r}
 simple_linear_model = lm(Price ~ Origin, data = cars)
@@ -156,8 +149,19 @@ summary(lm(medv ~ indus, boston))$r.squared
 cor(boston$indus, boston$medv)^2
 ```
 
-This is valid for simple, univariate OLS (p=1). Without modifying the definition, correlation is a meaningless concept in multiple regression.
+This is valid for simple, univariate OLS (p=1). I think you prove this on the homework?
 
+Without modifying the definition, correlation is a meaningless concept in multiple regression.
+
+After the model is fit, you usually want to predict with it using the $g$ function. Of course R can do this:
+
+```{r}
+simple_linear_model = lm(medv ~ rm, boston)
+predict(simple_linear_model, data.frame(rm = 4)) 
+#i.e. yhat = g(4)
+predict(simple_linear_model, data.frame(rm = c(4, 5, 6))) 
+#i.e. the yhat vector = [g(4), g(5), g(6)]
+```
 
 ## Multivariate linear regression
 
