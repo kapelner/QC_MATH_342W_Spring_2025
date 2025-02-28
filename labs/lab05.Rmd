@@ -2,29 +2,105 @@
 title: "Lab 5 MATH 342W"
 author: "Your Name Here"
 output: pdf_document
-date: "11:59PM March 12"
+date: "11:59PM March 16"
 ---
 
-
-Let's use the Boston Housing Data for the following exercises
+Load up the diamonds data
 
 ```{r}
-y = MASS::Boston$medv
-X = model.matrix(medv ~ ., MASS::Boston)
-p_plus_one = ncol(X)
-n = nrow(X)
+pacman::p_load(ggplot2, skim)
+diamonds = ggplot2::diamonds
 ```
 
-Using your function `orthogonal_projection` from the previous lab, orthogonally project onto the column space of X by projecting y on each vector of X individually and adding up the projections and call the sum `yhat_naive`.
+Consider the regression of price on color. Construct the design matrix with an intercept, X1 using `model.matrix` and its corresponding hat matrix H1.
+
+```{r}
+#TO-DO
+```
+
+Now construct the design matrix without the intercept, X2 using `model.matrix` and its corresponding hat matrix H2.
+
+```{r}
+#TO-DO
+```
+
+Verify the hat matrix constructed from this design matrix is the same as the hat matrix constructed from the design matrix with the intercept. (Fact: orthogonal projection matrices are unique).
+
+```{r}
+#TO-DO
+```
+
+Write a function spec'd as follows:
+
+```{r}
+#' Orthogonal Projection
+#'
+#' Projects vector a onto v.
+#'
+#' @param a   the vector to project
+#' @param v   the vector projected onto
+#'
+#' @returns   a list of two vectors, the orthogonal projection parallel to v named a_parallel, 
+#'            and the orthogonal error orthogonal to v called a_perpendicular
+orthogonal_projection = function(a, v){
+  #TO-DO
+  list(a_parallel = a_parallel, a_perpendicular = a_perpendicular)
+}
+```
+
+Provide predictions for each of these computations and then run them to make sure you're correct.
+
+```{r}
+orthogonal_projection(c(1,2,3,4), c(1,2,3,4))
+#prediction:
+orthogonal_projection(c(1, 2, 3, 4), c(0, 2, 0, -1))
+#prediction:
+result = orthogonal_projection(c(2, 6, 7, 3), c(1, 3, 5, 7))
+t(result$a_parallel) %*% result$a_perpendicular
+#prediction:
+result$a_parallel + result$a_perpendicular
+#prediction:
+result$a_parallel / c(1, 3, 5, 7)
+#prediction:
+```
+
+Project y onto colsp[Q] and verify it is the same as the OLS fit. You may have to use the function `unname` to compare the vectors since they the entries will likely have different names.
+
+```{r}
+#TO-DO
+expect
+```
+
+Project y onto colsp[Q] one by one and verify it sums to be the projection onto the whole space.
 
 ```{r}
 yhat_naive = #TO-DO
 ```
 
+Using the Boston housing data and create a design matrix X for all features and vector y for the responses.
+
+```{r}
+y = MASS::Boston$medv
+X = cbind(1, as.matrix(MASS::Boston[, 1 : 12]))
+```
+
+Find the OLS solution for X being used as the design matrix.
+
+```{r}
+b = solve(t(X) %*% X) %*% t(X) %*% y
+yhat = X %*% b
+```
+
+
+Using your function `orthogonal_projection` from the previous lab, orthogonally project onto the column space of X by projecting y on each vector of X individually and adding up the projections and call the sum `yhat_naive`.
+
+```{r}
+#TO-DO
+```
+
 How much double counting occurred? Measure the magnitude relative to the true LS orthogonal projection.
 
 ```{r}
-yhat = lm(medv ~ ., MASS::Boston)$fitted.values
 sqrt(sum(yhat_naive^2)) / sqrt(sum(yhat^2))
 ```
 
@@ -39,11 +115,7 @@ V = matrix(NA, nrow = n, ncol = p_plus_one)
 V[, 1] = X[, 1]
 for (j in 2 : ncol(X)){
   V[, j] = X[, j]
-  
-  for (k in 1:(j-1)){
-    v_k = V[, k, drop = FALSE]
-    V[, j] = V[, j] - #fill in here
-  }
+  #TO-DO
 }
 ```
 
@@ -57,7 +129,7 @@ for(j in 1 : p_plus_one){
 rm(V)
 ```
 
-Verify Q^T Q is I_{p+1} i.e. Q is an orthonormal matrix.
+Verify that Q^T Q = I_{p+1} i.e. Q is an orthonormal matrix.
 
 ```{r}
 #TO-DO
@@ -66,25 +138,110 @@ Verify Q^T Q is I_{p+1} i.e. Q is an orthonormal matrix.
 Is your Q the same as what results from R's built-in QR-decomposition function?
 
 ```{r}
-Q_from_Rs_builtin = #TO-DO
+#TO-DO
 ```
  
 Is this expected? Why did this happen?
 
 #TO-DO
 
-Project y onto colsp[Q] and verify it is the same as the OLS fit. You may have to use the function `unname` to compare the vectors since they the entries will likely have different names.
+Project the y vector onto each column of the Q matrix and test if the sum of these projections is the same as yhat.
 
 ```{r}
 #TO-DO
-expect
 ```
 
-Project y onto colsp[Q] one by one and verify it sums to be the projection onto the whole space.
+Find the OLS estimates b_Q if Q is used as the design matrix and compare to b, the estimates from the original design matrix X. 
 
 ```{r}
-yhat_naive = #TO-DO
+#TO-DO
 ```
+
+Are b and b_Q the same? Why or why not?
+
+#TO-DO
+
+Ensure that the predicted values are the same for both linear models: the one created with X as its design matrix and the one created with Q as its design matrix.
+
+```{r}
+#TO-DO
+```
+
+
+Clear the workspace and load the boston housing data and extract X and y. The dimensions are n = 506 and p = 13. Create a matrix that is (p + 1) x (p + 1) full of NA's. Label the columns the same columns as X. Do not label the rows. For the first row, find the OLS estimate of the y regressed on the first column only and put that in the first entry. For the second row, find the OLS estimates of the y regressed on the first and second columns of X only and put them in the first and second entries. For the third row, find the OLS estimates of the y regressed on the first, second and third columns of X only and put them in the first, second and third entries, etc. For the last row, fill it with the full OLS estimates.
+
+```{r}
+rm(list = ls())
+#TO-DO
+```
+
+Why are the estimates changing from row to row as you add in more predictors?
+
+#TO-DO
+
+Create a vector of length p+1 and compute the R^2 values for each of the above models. 
+
+```{r}
+#TO-DO
+```
+
+Is R^2 monotonically increasing? Why?
+
+#TO-DO
+
+Create a 2x2 matrix with the first column 1's and the next column iid normal realizations. Find the absolute value of the angle (in degrees, not radians) between the two columns in absolute difference from 90 degrees.
+
+```{r}
+X = matrix(, ncol = 2)
+acos() * 180 / pi
+```
+
+Repeat this exercise `Nsim = 1e5` times and report the average absolute angle.
+
+```{r}
+#TO-DO
+```
+
+Create a n x 2 matrix with the first column 1's and the next column iid normal realizations. Find the absolute value of the angle (in degrees, not radians) between the two columns. For n = 10, 50, 100, 200, 500, 1000, report the average absolute angle over `Nsim = 1e5` simulations.
+
+```{r}
+#TO-DO
+```
+
+What is this absolute angle difference from 90 degrees converging to? Why does this make sense?
+
+#TO-DO
+
+Create a vector y by simulating n = 100 standard iid normals. Create a matrix of size 100 x 2 and populate the first column by all ones (for the intercept) and the second column by 100 standard iid normals. Find the R^2 of an OLS regression of `y ~ X`. Use matrix algebra.
+
+```{r}
+#TO-DO
+```
+
+Write a for loop to each time bind a new column of 100 standard iid normals to the matrix X and find the R^2 each time until the number of columns p+1 = n = 100. Create a vector to save all R^2's. What happened??
+
+```{r}
+#TO-DO
+```
+
+Test that the projection matrix onto this X is the same as I_n. You may have to vectorize the matrices in the `expect_equal` function for the test to work.
+
+```{r}
+pacman::p_load(testthat)
+#TO-DO
+```
+
+Add one final column to X to bring the number of columns to 101. Then try to compute R^2. What happens? 
+
+```{r}
+#TO-DO
+```
+
+Why does this make sense?
+
+#TO-DO
+
+
 
 Split the Boston Housing Data into a training set and a test set where the training set is 80% of the observations. Do so at random.
 
@@ -164,4 +321,81 @@ Even though the concept of confidence intervals (CIs) will not be on the midterm
 
 ```{r}
 #TODO
+```
+
+
+
+#Visualization with the package ggplot2
+
+I highly recommend using the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) as a reference resource. You will see questions that say "Create the best-looking plot". Among other things you may choose to do, remember to label the axes using real English, provide a title and subtitle. You may want to pick a theme and color scheme that you like and keep that constant throughout this lab. The default is fine if you are running short of time.
+
+Load up the `GSSvocab` dataset in package `carData` as `X` and drop all observations with missing measurements. This will be a very hard visualization exercise since there is not a good model for vocab.
+
+```{r}
+#TO-DO
+```
+
+Briefly summarize the documentation on this dataset. What is the data type of each variable? What do you think is the response variable the collectors of this data had in mind?
+
+#TO-DO
+
+Create two different plots and identify the best-looking plot you can to examine the `age` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best looking plot you can to examine the `vocab` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `ageGroup` variable by `gender`. Does there appear to be an association? There are many ways to do this.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `vocab` variable by `age`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Add an estimate of $f(x)$ using the smoothing geometry to the previous plot. Does there appear to be an association now?
+
+```{r}
+#TO-DO
+```
+
+Using the plot from the previous question, create the best looking plot overloading with variable `gender`. Does there appear to be an interaction of `gender` and `age`?
+
+```{r}
+#TO-DO
+```
+
+
+Using the plot from the previous question, create the best looking plot overloading with variable `nativeBorn`. Does there appear to be an interaction of `nativeBorn` and `age`?
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best-looking plot you can to examine the `vocab` variable by `educGroup`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Using the best-looking plot from the previous question, create the best looking overloading with variable `gender`. Does there appear to be an interaction of `gender` and `educGroup`?
+
+```{r}
+#TO-DO
+```
+
+Using facets, examine the relationship between `vocab` and `ageGroup`. You can drop year level `(Other)`. Are we getting dumber?
+
+```{r}
+#TO-DO
 ```
