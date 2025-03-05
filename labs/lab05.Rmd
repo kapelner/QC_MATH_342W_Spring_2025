@@ -64,19 +64,6 @@ result$a_parallel / c(1, 3, 5, 7)
 #prediction:
 ```
 
-Project y onto colsp[Q] and verify it is the same as the OLS fit. You may have to use the function `unname` to compare the vectors since they the entries will likely have different names.
-
-```{r}
-#TO-DO
-expect
-```
-
-Project y onto colsp[Q] one by one and verify it sums to be the projection onto the whole space.
-
-```{r}
-yhat_naive = #TO-DO
-```
-
 Using the Boston housing data and create a design matrix X for all features and vector y for the responses.
 
 ```{r}
