@@ -141,43 +141,6 @@ NAME: \line(1,0){380}
 
 \end{enumerate}
 
-\problem{These are some questions related to probability estimation modeling. Let $X$ denote the design matrix with $n$ rows and $p+1$ columns (with the first column being $\onevec_n$ and the other columns being linearly independent predictors) and $\y$ is the binary response vector of size $n$ and use this notation throughout your responses.}
-
-\begin{enumerate}
-
-\easysubproblem{What is $g_0$ if you are modeling probability estimates?}\spc{1}
-
-\easysubproblem{What is $\mathcal{H}_{pr}$ for the probability estimation algorithm that employs the linear model in the covariates with logistic link function?}\spc{3}
-
-\easysubproblem{What is $\mathcal{H}_{pr}$ for the probability estimation algorithm that employs the linear model in the covariates with cloglog link function?}\spc{5}
-
-\easysubproblem{Let $\mathcal{A} : \b = \argmax_{\bv{w} \in \reals^{p+1}}\braces{\ldots}$. Derive the expression that replaces the $\ldots$ which will be a function of $X, \y, \bv{w}, n$. Note: this algorithm fits a \qu{logistic regression}. }\spc{6}
-
-\easysubproblem{Why is logistic regression an example of a \qu{generalized linear model} (glm)?}\spc{2}
-
-\easysubproblem{Consider $\x_*$ to be a new unit. For its prediction, the probability estimate that $y_*=1$ is 37\%, what is the log odds of $y_*=1$?}\spc{2}
-
-\easysubproblem{If, $\x_*\b = 3.1415$ where $\b$ is the result of the logistic regression fit, what is the probability estimate that $y_*=1$?}\spc{2}
-
-\intermediatesubproblem{If, $\x_*\b = 3.1415$ where $\b$ is the result of the probit regression fit, what is the probability estimate that $y_*=1$?}\spc{2}
-
-\easysubproblem{In probability estimation modeling, what is the formula for the Brier Score performance metric? Prove the Brier score is always non-positive.}\spc{1}
-
-\easysubproblem{In probability estimation modeling, what is the formula for the Log Scoring Rule performance metric? Prove the Log Scoring Rule is always non-positive.}\spc{1}
-
-\hardsubproblem{Generalize linear probability estimation to the case where $\mathcal{Y} = \braces{C_1, C_2, C_3}$, i.e. a nominal variable with $L=3$ levels.
-
-Assume the logistic link function. Write down the objective function that is argmax'd over the parameters (you define what these parameters are --- that is part of the question). Once you get the answer you can see how this easily goes to $L > 3$, an arbirtrary\footnote{Note: The algorithm for general $L$ is known as all of the following: \qu{multinomial logistic regression}, \qu{polytomous LR}, \qu{multiclass LR}, \qu{softmax regression}, \qu{multinomial logit} (mlogit), the \qu{maximum entropy} (MaxEnt) classifier, and the \qu{conditional maximum entropy model}. You can inflate your resume with lots of redundant jazzy terms by doing this one question!} number of response levels.\spc{11}}\pagebreak
-
-For the next two questions, let $n_1 := \sum \indic{y_i = 1}$ and $n_0 := \sum \indic{y_i = 0}$ so that $n = n_0 + n_1$. Then assume $n_1 \neq n_0$. This is equivalent to letting $n_1 = cn$ and $n_0 = (1-c)n$ and assuming $c \in [0,1]/\braces{\half}$.
-
-\intermediatesubproblem{[MA] Prove the Brier score is always higher for $g_0$ vs the model where you set $\hat{p_i} = \half$ for all $i$. Hint: $(1-c)c < \half$ for $c \in [0,1]/\braces{\half}$. }\spc{7}
-
-\hardsubproblem{[MA] Prove the Log Scoring Rule is always higher for $g_0$ vs the model where you set $\hat{p_i} = \half$ for all $i$.}\spc{10} %Hint: $c^c(1-c)^{1-c} > \half$ for $c \in [0,1]/\braces{\half}$.
-
-
-\end{enumerate}
-
 \end{document}
 
 
