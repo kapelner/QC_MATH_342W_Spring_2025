@@ -9,8 +9,9 @@ author: "Professor Adam Kapelner"
 Let's see how overfitting increases generalized estimation error.
 
 ```{r}
-rm(list = ls())
+pacman::p_load(ggplot2)
 set.seed(1)
+
 p_matters = 10
 bbeta = rep(1, p_matters + 1)
 sigma_noise = 0.3
@@ -19,12 +20,14 @@ sigma_noise = 0.3
 n = 100
 X = cbind(1, matrix(rnorm(n * p_matters), nrow = n))
 y = X %*% bbeta + rnorm(n, 0, sigma_noise) #y_vec_past = X_past beta_vec + epsilon_vec_past
+SST = sum((y - mean(y))^2)
 #\amthbb{D}
 
 #build test data
 n_star = 1000
 X_star = cbind(1, matrix(rnorm(n_star * p_matters), nrow = n_star))
 y_star = X_star %*% bbeta + rnorm(n_star, 0, sigma_noise) #y_vec_future = X_future beta_vec + epsilon_vec_future
+SST_star = sum((y_star - mean(y_star))^2)
 
  #stationarity assumed i.e. 
 #beta_vec, process to generate X's, process to generate epsilons same from past to future
@@ -32,6 +35,7 @@ y_star = X_star %*% bbeta + rnorm(n_star, 0, sigma_noise) #y_vec_future = X_futu
 all_bs = matrix(NA, n, n)
 all_bs[p_matters + 1, 1 : (p_matters + 1)] = coef(lm(y ~ 0 + X))
 in_sample_rmse_by_p = array(NA, n)
+in_sample_Rsq_by_p = array(NA, n)
 for (j in 1 : n){
   if (j > (p_matters + 1)){
     X = cbind(X, rnorm(n))
@@ -39,34 +43,53 @@ for (j in 1 : n){
   lm_mod = lm(y ~ 0 + X[, 1 : j])
   all_bs[j, 1 : j] = coef(lm_mod)
   y_hat = X[, 1 : j] %*% t(all_bs[j, 1 : j, drop = FALSE])
-  in_sample_rmse_by_p[j] = sqrt(mean((y - y_hat)^2))
+  SSE = sum((y - y_hat)^2)
+  in_sample_rmse_by_p[j] = sqrt(SSE / (n - j - 1))
+  in_sample_Rsq_by_p[j] = 1 - SSE / SST
 }
-pacman::p_load(ggplot2)
 ggplot(data.frame(num_features = 1 : n, in_sample_rmse_by_p = in_sample_rmse_by_p)) + 
   geom_point(aes(x = num_features, y = in_sample_rmse_by_p))
+ggplot(data.frame(num_features = 1 : n, in_sample_Rsq_by_p = in_sample_Rsq_by_p)) + 
+  geom_point(aes(x = num_features, y = in_sample_Rsq_by_p))
+ggplot(data.frame(num_features = 1 : n, in_sample_Rsq_by_p = in_sample_Rsq_by_p)) + 
+  geom_point(aes(x = num_features, y = log10(1 - in_sample_Rsq_by_p)))
 
 
 bbeta
-all_bs[, 1 : (p_matters + 1)]
-b_error_by_p = rowSums((all_bs[, 1 : (p_matters + 1)] - matrix(rep(bbeta, n), nrow = n, byrow = TRUE))^2)
+all_bs[1 : (p_matters + 1), 1 : (p_matters + 1)]
+all_bs[91:100, ]
+bbeta_matrix = matrix(0, n, n)
+bbeta_matrix[, 1 : (p_matters + 1)] = matrix(rep(bbeta, n), nrow = n, byrow = TRUE)
+b_error_by_p = apply((all_bs - bbeta_matrix)^2, 1, function(j){sum(j, na.rm = TRUE)})
 ggplot(data.frame(num_features = 1 : n, b_error_by_p = b_error_by_p)) + 
   geom_point(aes(x = num_features, y = b_error_by_p))
 
 #look at out of sample error with random features too
 oos_rmse_by_p = array(NA, n)
+oos_Rsq_by_p = array(NA, n)
 X_star = cbind(X_star, matrix(rnorm(n_star * (n - (p_matters + 1))), nrow = n_star))
 for (j in 1 : n){
   y_hat_star = X_star[, 1 : j] %*% t(all_bs[j, 1 : j, drop = FALSE])
-  oos_rmse_by_p[j] = sqrt(mean((y_star - y_hat_star)^2))
+  oos_SSE = sum((y_star - y_hat_star)^2)
+  oos_rmse_by_p[j] = sqrt(oos_SSE / n_star)
+  oos_Rsq_by_p[j] = 1 - oos_SSE / SST_star
 }
 ggplot(data.frame(num_features = 1 : n, oos_rmse_by_p = oos_rmse_by_p)) + 
   geom_point(aes(x = num_features, y = oos_rmse_by_p))
+ggplot(data.frame(num_features = 1 : n, oos_Rsq_by_p = oos_Rsq_by_p)) + 
+  geom_point(aes(x = num_features, y = oos_Rsq_by_p))
+ggplot(data.frame(num_features = 1 : n, oos_Rsq_by_p = oos_Rsq_by_p)) + 
+  geom_point(aes(x = num_features, y = oos_Rsq_by_p)) + 
+  ylim(0, 1)
 
 #both together
-plot_obj = ggplot(data.frame(num_features = 1 : n, in_sample_rmse_by_p = in_sample_rmse_by_p, oos_rmse_by_p = oos_rmse_by_p)) + 
+ggplot(data.frame(num_features = 1 : n, in_sample_rmse_by_p = in_sample_rmse_by_p, oos_rmse_by_p = oos_rmse_by_p)) + 
   geom_line(aes(x = num_features, y = oos_rmse_by_p), color = "darkgreen") + 
   geom_line(aes(x = num_features, y = in_sample_rmse_by_p), color = "red")
-plot_obj
+ggplot(data.frame(num_features = 1 : n, in_sample_Rsq_by_p = in_sample_Rsq_by_p, oos_Rsq_by_p = oos_Rsq_by_p)) + 
+  geom_line(aes(x = num_features, y = oos_Rsq_by_p), color = "darkgreen") + 
+  geom_line(aes(x = num_features, y = in_sample_Rsq_by_p), color = "red")
+
 ```
 
 Let's look at overfitting from another angle. Let's generate a linear model ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
@@ -74,6 +97,7 @@ Let's look at overfitting from another angle. Let's generate a linear model ($f 
 This simulation is random, but to ensure it looks the same to me right now as it does in class (and to you at home), let's "set the seed" so it is deterministic.
 
 ```{r}
+rm(list = ls())
 set.seed(1003)
 ```
 
@@ -121,7 +145,7 @@ And let's plot the true function $h^*$ below as well in green:
 ```{r}
 basic_and_lines = basic + 
   geom_abline(intercept = b_0, slope = b_1, col = "blue") +
-  geom_abline(intercept = beta_0, slope = beta_1, col = "green") + 
+  geom_abline(intercept = beta_0, slope = beta_1, col = "darkgreen") + 
   geom_segment(aes(x = x, y = h_star_x, xend = x, yend = y), col = "red")
 basic_and_lines
 ```
@@ -149,22 +173,7 @@ basic_and_lines +
   geom_segment(data = df_new, aes(x = x, y = y_hat_new, xend = x, yend = y), col = "purple")
 ```
 
-Instead of the residuals let's look at its true errors, epsilon, the distance from $h^*$:
-
-```{r}
-basic_and_lines + 
-  geom_point(data = df_new) + 
-  geom_segment(data = df_new, aes(x = x, y = h_star_x, xend = x, yend = y), col = "darkgrey")
-```
-
-The errors that the overfit model are worse than the errors made by the best model. In other words, the residual standard error on the new "out of sample" data is much larger than the actual epsilon standard error:
-
-```{r}
-sd(df_new$e)
-sd(epsilon_new)
-```
-
-How did we get in this mess? We can see from the picture we are using the grey line as $g$ but we should be using the green line $h^*$. We are using the grey line because we used the original $\epsilon$ to fit. BAD idea - won't generalize to the future.
+How did we get in this mess? We can see from the picture we are using the blue line as $g$ but we should be using the green line $h^*$. We are using the blue line because we used the original $\epsilon$ to fit. BAD idea - won't generalize to the future.
 
 ```{r}
 rm(list = ls())
@@ -220,7 +229,7 @@ And the $R^2$ is:
 summary(mod)$r.squared
 ```
 
-Not great... plenty of room for overfitting the nonsense epsilons.
+Not great... but we can't really do better as here h* = f and the noise is ignorance error. But that's not the point here. The point is that lack of fit gives us plenty of room for overfitting the nonsense epsilons.
 
 Now what happens if we add a random predictor? 
 
@@ -232,7 +241,8 @@ Now what happens if we add a random predictor?
 Okay - but how bad? It only depends on how much $g$ diverges from $h^*$. Let's look at this divergence slowly. We create a new oos data set made from evenly spaced $x$ values across its range and random values of the nonsense predictors. We use this to calculated oos $s_e$.
 
 ```{r}
-p_fake = 2
+#n = 100 so p_fake cannot be more than 98
+p_fake = 90
 set.seed(1984)
 X = data.frame(matrix(c(x, rnorm(n * p_fake)), ncol = 1 + p_fake, nrow = n))
 mod = lm(y ~ ., X)
@@ -255,7 +265,8 @@ basic_with_yhat = basic +
 basic_with_yhat
 
 basic_with_yhat +
-  geom_line(data = data.frame(x = Xstar[, 1], y = y_hat_stars), aes(x = x, y = y), col = "orange")
+  geom_line(data = data.frame(x = Xstar[, 1], y = y_hat_stars), aes(x = x, y = y), col = "orange") + 
+  scale_y_continuous()
 ```
 
 Lesson: it takes a bit of time to overfit badly. Don't worry about a few extra degrees of freedom if you have $n$ much larger than $p$. But it will eventually be corrosive!
