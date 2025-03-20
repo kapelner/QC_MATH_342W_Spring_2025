@@ -1,0 +1,1182 @@
+\documentclass[12pt]{article}
+
+\include{preamble}
+
+\newtoggle{solutions}
+\toggletrue{solutions}
+
+\newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
+
+\newcommand{\logbaseten}[1]{\text{log$_{10}$}\parens{#1}}
+
+\title{Math 342W / 642 / RM742 Spring \the\year{} \\ Midterm Examination One}
+\author{Professor Adam Kapelner}
+
+\date{March 20, \the\year{}}
+
+\begin{document}
+\maketitle
+
+\noindent Full Name \line(1,0){410}
+
+\thispagestyle{empty}
+
+\section*{Code of Academic Integrity}
+
+\footnotesize
+Since the college is an academic community, its fundamental purpose is the pursuit of knowledge. Essential to the success of this educational mission is a commitment to the principles of academic integrity. Every member of the college community is responsible for upholding the highest standards of honesty at all times. Students, as members of the community, are also responsible for adhering to the principles and spirit of the following Code of Academic Integrity.
+
+Activities that have the effect or intention of interfering with education, pursuit of knowledge, or fair evaluation of a student's performance are prohibited. Examples of such activities include but are not limited to the following definitions:
+
+\paragraph{Cheating} Using or attempting to use unauthorized assistance, material, or study aids in examinations or other academic work or preventing, or attempting to prevent, another from using authorized assistance, material, or study aids. Example: using an unauthorized cheat sheet in a quiz or exam, altering a graded exam and resubmitting it for a better grade, etc.\\
+\\
+\noindent I acknowledge and agree to uphold this Code of Academic Integrity. \\~\\
+
+\begin{center}
+\line(1,0){350} ~~~ \line(1,0){100}\\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~signature~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ date
+\end{center}
+
+\normalsize
+
+\section*{Instructions}
+This exam is 110 minutes (variable time per question) and closed-book. You are allowed \textbf{two} pages (front and back) of a \qu{cheat sheet}, blank scrap paper (provided by the proctor) and a graphing calculator (which is not your smartphone). Please read the questions carefully. Within each problem, I recommend considering the questions that are easy first and then circling back to evaluate the harder ones. No food is allowed, only drinks. %If the question reads \qu{compute,} this means the solution will be a number otherwise you can leave the answer in \textit{any} widely accepted mathematical notation which could be resolved to an exact or approximate number with the use of a computer. I advise you to skip problems marked \qu{[Extra Credit]} until you have finished the other questions on the exam, then loop back and plug in all the holes. I also advise you to use pencil. The exam is 100 points total plus extra credit. Partial credit will be granted for incomplete answers on most of the questions. \fbox{Box} in your final answers. Good luck!
+
+\pagebreak
+
+\problem This question relates to conceptual issues.
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{8} Circle the letters of all the following that are \textbf{true}. The notation below should be assumed the same from class. \iftoggle{solutions}{\inred{
+c d f i j k m n
+}}
+
+\begin{enumerate}[(a)]
+\item A model $g$ for a real-world, non-man-made phenomenon $y$ which is a function of real-world measurements $x_1, \ldots, x_p$ could be absolutely true, (i.e. always have zero error when predicting in for future units).
+\item A model $g$ for phenomenon $y$ can be proved true analytically (using a mathematical deductive proof).
+\item A null model $g_0$ outputs a value in the set $\mathcal{Y}$.
+\item A null model $g_0$ can still be \qu{useful} to the model's user.
+\item Any model $g$ which is a function of real-world measurements $x_1, \ldots, x_p$ \textit{always} beats $g_0$ on predictive performance.
+\item A model $g$ for phenomenon $y$ which is of type nominal categorical with possible values within the set $C_1, C_2, \ldots, C_L$ must return a value within the set $C_1, C_2, \ldots, C_L$.
+\item A model $g$ for phenomenon $y$ which is of type nominal categorical with possible values within the set $C_1, C_2, \ldots, C_L$ must have a proxy $x_j$ which is also type nominal categorical with possible values within the set $C_1, C_2, \ldots, C_L$.
+
+\item If $x_j$ is of type nominal categorical with possible values within the set $C_1, C_2, \ldots, C_L$, then it is reasonable when modeling that those categorical values should be replaced by $1, 2, \ldots, L$.
+
+\item If $x_j$ is of type nominal categorical with possible values within the set $C_1, C_2, \ldots, C_L$, then it is reasonable when modeling that those categorical values should be replaced by $L-1$ binary variables indicating the presence of absence of categories $C_2, \ldots, C_L$.
+
+\item If $x_j$ is of type ordinal with possible values within the set $C_1, C_2, \ldots, C_L$, assuming that set is ordered from smallest to largest, then it is reasonable when modeling that those categorical values \textit{can} be replaced by $1, 2, \ldots, L$.
+
+\item If $x_j$ is of type ordinal with possible values within the set $C_1, C_2, \ldots, C_L$, then it is reasonable when modeling that those categorical values \textit{can} be replaced by $L-1$ binary variables indicating the presence of absence of categories $C_2, \ldots, C_L$.
+
+\item In-sample performance metrics gives you an honest idea about how accurate your model is when using it for future prediction \textit{always}.
+\item In-sample performance metrics gives you an honest idea about how accurate your model is when using it for future prediction \textit{only} when $n$ is much larger than $p$.
+\item Out-of-sample validation gives you an idea about how accurate your model is when using it for future prediction \textit{always}.
+\item Out-of-sample validation gives you an idea about how accurate your model is when using it for future prediction \textit{only} when $n$ is much larger than $p$.
+\item Out-of-sample validation gives you an idea about how accurate your model is when using it for future prediction \textit{only} when $\mathcal{Y} \subseteq \reals$.
+\end{enumerate}
+
+\end{enumerate}
+\pagebreak
+
+\problem Consider the following data frame $\mathbb{D}$. Below is some \texttt{R} code (lines beginning with $>$ are commands that were entered, other lines are output from those commands).
+
+\begin{lstlisting}
+> skimr::skim(D)
+--- Data Summary ---------------------------------  
+                           Values
+Name                       D     
+Number of rows             592   
+Number of columns          4     
+Key                        NULL  
+---------------------------------           
+Column type frequency:           
+  character                2     
+  numeric                  2     
+---------------------------------         
+Group variables            None  
+
+--- Variable type: factor ---------------------
+  skim_variable n_missing complete_rate ordered n_unique top_counts                           
+1 eye_color             0             1 FALSE          4 Bro: 220, Blu: 215, Haz: 93, Gre: 64 
+2 hair_color            0             1 FALSE          4 Bro: 286, Blo: 127, Bla: 108, Red: 71
+
+--- Variable type: numeric ------------------
+  skim_variable n_missing complete_rate  mean    sd p0 p25 p50 p75 p100 
+1 is_male               0             1 0.471 0.500  0   0   0   1    1 
+2 is_not_male           0             1 0.529 0.500  0   0   1   1    1 
+
+> D$is_not_male = 1 - D$is_male
+> D[sample(1 : nrow(D), 10), ]
+    is_male eye_color hair_color is_not_male
+71        1     Brown      Brown           0
+446       0     Hazel      Brown           1
+474       0     Green      Brown           1
+75        1     Brown      Brown           0
+489       0     Brown        Red           1
+107       1     Brown      Brown           0
+473       0     Green      Brown           1
+69        1     Brown      Brown           0
+447       0     Hazel      Brown           1
+137       1      Blue      Brown           0
+\end{lstlisting}
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{1} Circle one letter: the output on lines 28--37 is ... 
+
+\begin{enumerate}[A)]
+    \item the first 10 rows of data frame $\mathbb{D}$
+    \item \iftoggle{solutions}{\inred{
+a random 10 rows of data frame $\mathbb{D}$
+}}{
+a random 10 rows of data frame $\mathbb{D}$
+}
+    \item the last 10 rows of data frame $\mathbb{D}$
+\end{enumerate}
+\pagebreak
+
+\subquestionwithpoints{1} What type of variable is \texttt{eye\_color}? Be as specific as you can.
+
+\iftoggle{solutions}{\inred{
+nominal (or unordered) categorical (or factor)
+}}{~\spc{1}}
+
+Let $y$ be defined as the variable \texttt{is\_male} and all other variables be considered features.
+
+
+\subquestionwithpoints{2} What is the $g_0$ function equal to explicitly?
+
+\iftoggle{solutions}{\inred{
+$g_0 = $ 0
+}}{~\spc{0.5}}
+
+\subquestionwithpoints{3}  Circle all of the following modeling procedures that would be appropriate for this modeling setting considering the response space.
+
+\begin{enumerate}[A)]
+    \item OLS
+    \item \iftoggle{solutions}{\inred{
+Perceptron
+}}{
+Perceptron
+}
+    \item \iftoggle{solutions}{\inred{
+SVM
+}}{
+SVM
+}
+    \item \iftoggle{solutions}{\inred{
+SVM with Vapnik objective function (and a numeric choice for hyperparameter $\lambda$)
+}}{
+SVM with Vapnik objective function (and a numeric choice for hyperparameter $\lambda$)
+}
+    \item \iftoggle{solutions}{\inred{
+KNN with the Euclidean distance function
+}}{
+KNN with the Euclidean distance function
+}
+    \item \iftoggle{solutions}{\inred{
+KNN with a non-Euclidean, but still valid distance function
+}}{
+KNN with a non-Euclidean, but still valid distance function
+}
+\end{enumerate}
+
+
+\subquestionwithpoints{3} Regardless of your answer in (c), how many columns will the full-rank design matrix $X$ have? Hint: make sure you include the $\onevec_n$ as the first column in $X$.
+
+\iftoggle{solutions}{\inred{
+8 = 1 for intercept + 3 for eye\_color + 3 for hair\_color + 1 for is\_not\_male
+}}{~\spc{0.5}}
+
+
+\subquestionwithpoints{2} Regardless of your answer in (c), consider using the SVM to fit $g$. What would the in-sample misclassification error for $g$ be?
+
+\iftoggle{solutions}{\inred{
+0
+}}{~\spc{1}}
+
+
+\subquestionwithpoints{2} Regardless of your answer in (c), consider using the OLS to fit $g$. What would the in-sample misclassification error for $R^2$ be?
+
+\iftoggle{solutions}{\inred{
+1
+}}{~\spc{1}}
+
+\pagebreak
+Now we will change the modeling target. Let $y$ be defined as the variable \texttt{eye\_color} and all other variables be considered features.
+
+
+\subquestionwithpoints{2} What is the $g_0$ function equal to explicitly?
+
+\iftoggle{solutions}{\inred{
+$g_0 = $ Brown
+}}{~\spc{0}}
+
+\subquestionwithpoints{3}  Circle all of the following modeling procedures that would be appropriate for this modeling setting considering the response space.
+
+\begin{enumerate}[A)]
+    \item OLS
+    \item Perceptron
+    \item SVM
+    \item SVM with Vapnik objective function (and a numeric choice for hyperparameter $\lambda$)
+
+    \item \iftoggle{solutions}{\inred{
+KNN with the Euclidean distance function
+}}{
+KNN with the Euclidean distance function
+}
+    \item \iftoggle{solutions}{\inred{
+KNN with a non-Euclidean, but still valid distance function
+}}{
+KNN with a non-Euclidean, but still valid distance function
+}
+\end{enumerate}
+
+
+\subquestionwithpoints{3} Regardless of your answer in (g), how many columns will the full-rank design matrix $X$ have? Hint: make sure you include the $\onevec_n$ as the first column in $X$.
+
+\iftoggle{solutions}{\inred{
+5 = 1 for intercept + 3 for hair\_color + 1 for is\_male (this is\_not\_male is dropped as it's a linear combination of the intercept and is\_male)
+}}{~\spc{0.5}}
+
+Now we will change the modeling target again. Let $y$ be defined as the variable \texttt{hair\_color} and we only use the feature \texttt{eye\_color}.
+
+\subquestionwithpoints{5} Let the reference level of \texttt{eye\_color} be Green. For the subset of the data shown on rows 28--37 of the code, provide the same 10-row subset of the full-rank design matrix $X$. Name the columns of $X$ appropriately.
+
+
+\iftoggle{solutions}{
+\begin{table}[h]
+    \centering
+    \inred{
+    \begin{tabular}{|c|c|c|c|}
+        (intercept) & eye\_color\_is\_brown & eye\_color\_is\_blue & eye\_color\_is\_hazel  \\ \hline
+        1 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 1 \\
+        1 & 0 & 0 & 0 \\
+        1 & 1 & 0 & 0 \\
+        1 & 1 & 0 & 0 \\
+        1 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 \\
+        1 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 1 \\
+        1 & 0 & 1 & 0 \\ \hline
+    \end{tabular}}
+\end{table}
+}{~\spc{6}}
+\pagebreak
+
+\subquestionwithpoints{2} Assume you use KNN with the Euclidean distance function to fit $g$. Of the three sources of error, which is likely the largest source of error in $g$'s predictions?
+
+\iftoggle{solutions}{\inred{
+ignorance
+}}{~\spc{0.5}}
+\end{enumerate}
+
+
+\problem Here are some theoretical questions. For all notation used, assume it has the same as it did in class.
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{4} Assume $\mathcal{A} = $ OLS (linear regression). Prove that $\bv{b} = R^{-1} Q^\top \y$.
+
+
+\iftoggle{solutions}{\inred{
+\beqn
+\b &=& (X^\top X)^{-1} X^\top \y \\
+&=& ((QR)^\top QR)^{-1} (QR)^\top \y \\
+&=& (R^\top Q^\top QR)^{-1} R^\top Q^\top \y \\
+&=& (R^\top R)^{-1} R^\top Q^\top \y \\
+&=& R^{-1} (R^\top)^{-1} R^\top Q^\top \y \\
+&=& R^{-1} Q^\top \y \\
+\eeqn
+}}{~\spc{6}}
+
+\subquestionwithpoints{10} Assume $\mathcal{A} = $ OLS (linear regression). For each of the following, if the operation is illegal, write \qu{illegal}. If the operation is legal and the expression allows for simplification, simplify as best you can after an \qu{=} sign. If you cannot simplify, then leave the line \textit{blank}. If your answer is the zero or one vector, please indicate the dimension as a subscript to get full credit.
+
+\begin{itemize}
+    \item $XQ$ \iftoggle{solutions}{\inred{
+illegal
+}}{~\spc{0.5}}
+    \item $XR$ \iftoggle{solutions}{\inred{
+
+}}{~\spc{0.5}}
+    \item $X\bv{b}$ \iftoggle{solutions}{\inred{
+$= \hat{\y}$
+}}{~\spc{0.5}}
+    \item $HQ$ \iftoggle{solutions}{\inred{
+$= Q$
+}}{~\spc{0.5}}
+\pagebreak
+    \item $QH$ \iftoggle{solutions}{\inred{
+illegal
+}}{~\spc{0.5}}
+    \item $Q\bv{b}$ \iftoggle{solutions}{\inred{
+
+}}{~\spc{0.5}}
+    \item $\y^\top H$ \iftoggle{solutions}{\inred{
+$= \hat{\y}^\top$
+}}{~\spc{0.5}}
+    \item $\bv{e}^\top H$ \iftoggle{solutions}{\inred{
+$= \zerovec_n^\top$
+}}{~\spc{0.5}}
+    \item $QQ^\top \onevec_n$ \iftoggle{solutions}{\inred{
+$= \onevec_n$
+}}{~\spc{0.5}}
+    \item $\rank{H} / \rank{X}$ \iftoggle{solutions}{\inred{
+$= 1$
+}}{~\spc{0}}
+\end{itemize}
+
+
+
+\end{enumerate}
+
+\problem Consider the Galton dataset we examined in lab. Below is some \texttt{R} code (lines beginning with $>$ are commands that were entered, other lines are output from those commands).
+
+\begin{lstlisting}
+> skimr::skim(HistData::Galton)
+--- Data Summary ------------------------
+                           Values          
+Name                       HistData::Galton
+Number of rows             928             
+Number of columns          2               
+-------------------------                  
+Column type frequency:                     
+  numeric                  2                
+
+--- Variable type: numeric ------------------------- 
+  skim_variable n_missing complete_rate mean   sd   p0  p25  p50  p75 p100 
+1 parent                0             1 68.3 1.79 64   67.5 68.5 69.5 73   
+2 child                 0             1 68.1 2.52 61.7 66.2 68.2 70.2 73.7 
+\end{lstlisting}
+
+\vspace{-0.7cm}
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{1} What is the sample size of this dataset?
+
+\iftoggle{solutions}{\inred{
+$928$
+}}{~\spc{0}}
+\pagebreak
+
+
+As in the lab, consider the dependent variable \texttt{child} which measures the height of a child and consider the independent variable \texttt{parent} which measures the average height of the mother and father of the child.
+
+\subquestionwithpoints{1} What is $p$ in this modeling context?
+
+\iftoggle{solutions}{\inred{
+$1$
+}}{~\spc{0}}
+
+\subquestionwithpoints{3} \qu{The unit is one \_\_\_} (fill in the blank below by describing the unit).
+
+\iftoggle{solutions}{\inred{
+father-mother-child trio
+}}{~\spc{2}}
+
+
+\subquestionwithpoints{2} Regardless of the $\mathcal{A}$ employed to create a model, which will likely be the greatest of the three sources of error?
+
+\iftoggle{solutions}{\inred{
+ignorance (since there's only one feature and the phenomenon of interest is complicated)
+}}{~\spc{1}}
+
+\subquestionwithpoints{2} If $\mathcal{A} =$ OLS, what are the contents of the set $\mathcal{H}$?
+
+\iftoggle{solutions}{\inred{
+\beqn
+\mathcal{H} = \braces{w_0 + w_1 x : w_0, w_1 \in \reals} = \braces{[1~x]\bv{w} : \bv{w} \in \reals^2}
+\eeqn
+}}{
+$~\\\mathcal{H} = $~\spc{1}}
+
+\subquestionwithpoints{3} If $\mathcal{A} =$ OLS, provide one specific $<x,y>$ point on the OLS line (i.e. the $g$ model).
+
+\iftoggle{solutions}{\inred{
+since $<\xbar, \ybar>$ is always on the OLS line, the only point you could know about without more output is $<68.3, 68.1>$ 
+}}{~\spc{1.5}}
+
+\pagebreak
+
+\subquestionwithpoints{5} Prove numerically that there is \qu{regression to the mean} for the phenomenon of interest in this modeling setting. Assume that the correlation coefficient between the two variables is 0.46.
+
+\iftoggle{solutions}{\inred{
+Regression to the mean means that we predict a child to have a smaller height than their parents for parents with above-average height and we predict a child to have a larger height than their parents for parents with below-average height. This is equivalent to showing $b_1 < 1$. We now calculate $b_1$ and show it is less than 1.
+
+\beqn
+b_1 = r \frac{s_y}{s_x} = 0.46 \cdot \frac{2.52}{1.79} = 0.65 < 1
+\eeqn
+}}{~\spc{5}}
+
+
+\subquestionwithpoints{5} If $\mathcal{A} =$ OLS, calculate the RMSE to two decimals.
+
+\iftoggle{solutions}{\inred{
+\beqn
+SST &=& (n-1)s^2_y = 927 \cdot 2.52^2 = 5886.821 \\
+R^2 &=& 1 - SSE / SST \mathimplies SSE = SST (1 - R^2) = 5886.821 (1 - .46^2) = 4650.588 \\
+RMSE &=& \sqrt{\frac{SSE}{n - (p+1)}} = \sqrt{\frac{4650.588}{ 926}} = 2.24
+\eeqn
+}}{~\spc{5.5}}
+
+\end{enumerate}
+
+\problem Consider the following illustration of cross-validation for $\mathbb{D}$ with $n=200$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=3.5in]{cv.png}
+\end{figure}
+\FloatBarrier
+\pagebreak
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{1} What is the value of $K$?
+
+\iftoggle{solutions}{\inred{
+5
+}}{~\spc{0}}
+
+\subquestionwithpoints{1} How many units will be in $\mathbb{D}_{train}$ in the first split?
+
+\iftoggle{solutions}{\inred{
+$n - \oneover{K} n = 160$
+}}{~\spc{0}}
+
+\subquestionwithpoints{1} If you calculate oos residuals in the second split, how many oos residuals will there be?
+
+\iftoggle{solutions}{\inred{
+It's the same as the size of $\mathbb{D}_{test}$ which is 40.
+}}{~\spc{0}}
+
+
+\subquestionwithpoints{2} If $g$ was overfit on $\mathbb{D}_{train}$, then how would oosRMSE be expected to compare with in-sample RMSE?
+
+\iftoggle{solutions}{\inred{
+oosRMSE $>$ in-sample RMSE
+}}{~\spc{3}}
+
+\subquestionwithpoints{3} If you calculate the oosRMSE from the residuals in (c), this oosRMSE is expected to be greater than, less than or equal to the oosRMSE you expect in the future when predicting on $g_{final}$ which is fit with all $\mathbb{D}$?
+
+\iftoggle{solutions}{\inred{
+greater than
+}}{~\spc{3}}
+
+\subquestionwithpoints{3} If you aggregate all the residuals from all $K$ folds together and calculate the oosRMSE, this oosRMSE is expected to be greater than, less than or equal to the oosRMSE you expect in the future when predicting on $g_{final}$ which is fit with all $\mathbb{D}$?
+
+\iftoggle{solutions}{\inred{
+greater than
+}}{~\spc{3}}
+
+\end{enumerate}
+\pagebreak
+
+\problem Consider the following $\mathbb{D}$ illustrated within the questions below.
+
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} Examine the plot of $\mathbb{D}$ in the following question. If $y$ is the response variable and the other two variables are considered features, what is the formal name of the type of modeling scenario most likely depicted?
+
+\iftoggle{solutions}{\inred{
+binary classification
+}}{~\spc{1}}
+
+\subquestionwithpoints{2} If $\mathcal{A} = $ perceptron with the $\mathcal{H}$ we considered thus far in class, draw a possible $g$ that outputs from this algorithm after 10,000 iterations on the illustration below:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5in]{classification.pdf}
+\end{figure}
+\FloatBarrier
+
+\iftoggle{solutions}{\inred{
+any straight line is acceptable
+}}{~\spc{-1}}
+
+
+\subquestionwithpoints{1} If $\mathcal{A} = $ perceptron with the $\mathcal{H}$ we considered thus far in class, will the algorithm eventually converge? Circle one: ~~yes~~/~~\iftoggle{solutions}{\inred{no}}{no}
+
+\pagebreak
+
+\subquestionwithpoints{4} If $\mathcal{A} = $ SVM with the $\mathcal{H}$ we considered thus far in class and the Vapnik function with hinge errors and $\lambda = 0.001$, draw the $g$ that most likely outputs from this algorithm on the illustration below:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5in]{classification.pdf}
+\end{figure}
+\FloatBarrier
+
+\iftoggle{solutions}{\inred{
+With the hyperparameter set to such a low value, we're really just minimizing sum of hinge errors which would likely be the horizontal line at $x_2 \approx 0.75$.
+}}{~\spc{-1}}
+
+
+\subquestionwithpoints{3} If $\mathcal{A} = $ SVM with the $\mathcal{H}$ we considered thus far in class and the Vapnik function with hinge errors and $\lambda = 0.001$, what is the most likely of the three sources of error in $g$?
+
+\iftoggle{solutions}{\inred{
+Misspecification since we can clearly see a semicircle threshold with diameter running across $x_2 = 0$ can obtain near zero misclassification error.
+}}{~\spc{1}}
+
+
+
+\subquestionwithpoints{2} If $\mathcal{A} = $ KNN with the Euclidean distance function and $K=1$, what would be $g(0,0)$?
+
+\iftoggle{solutions}{\inred{
+The closest point to $<0,0>$ has $y = 0$ so thus $\yhat = 0$.
+}}{~\spc{1}}
+
+\subquestionwithpoints{2} If $\mathcal{A} = $ KNN with the Euclidean distance function and $K=10$, what would be $g(0,0)$?
+
+\iftoggle{solutions}{\inred{
+Draw a circle arc from the y-axis to the x-axis with $<0,0>$ at its center such that 10 points are included. It is clear that there are more triangles than dots so that the modal value $\yhat = 1$.
+}}{~\spc{1}}
+
+\end{enumerate}
+
+\end{document}
+
+\problem We measure the time (in months) between $n=60$ earthquakes. Here is a scatterplot of the raw data:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=4.5in]{earthquake_plot.pdf}
+    \label{fig:enter-label}
+\end{figure}
+
+The time between earthquakes is known to be exponentially distributed. We suspect the distribution's mean changed once (at some point). So the DGP for the above data will be:
+
+\beqn
+X_1, X_2, \ldots, X_{\theta_3} \iid \theta_1 e^{-\theta_1 x} ~~\text{independent of}~~ X_{\theta_3 + 1}, X_{\theta_3 + 2}, \ldots, X_n \iid \theta_2 e^{-\theta_2 x}
+\eeqn
+
+\noindent For this problem, you may need to know some of these facts about the gamma distribution:
+
+\beqn
+Y \sim \text{Gamma}(\alpha, \beta) := \frac{\beta^\alpha}{\Gamma(\alpha)} y^{\alpha - 1} e^{-\beta y} \indic{y > 0}, ~~ F(y) = P(\alpha, \beta y),~~S(y) = Q(\alpha, \beta y)
+\eeqn
+
+\noindent where $P,Q$ are the lower and upper regularized gamma functions.
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} How many parameters can you draw inference for in this DGP?
+%
+\iftoggle{solutions}{\inred{
+\beqn
+3
+\eeqn
+}}{~\spc{0.5}}
+%
+
+\subquestionwithpoints{5} Find the likelihood of the data, $f(\x; \theta_1, \theta_2, \theta_3)$. Denote the sample size as $n$ i.e., do not use its known value of 60 here. You can assume all $x_i > 0$.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+f(\x; \theta_1, \theta_2, \theta_3) &=& \prod_{i=1}^{\theta_3} f(x_i; \theta_1) \prod_{\theta_3 +1}^n f(x_i; \theta_2) \\
+ &=& \prod_{i=1}^{\theta_3} \theta_1 e^{-\theta_1 x_i} \prod_{\theta_3 +1}^n \theta_2 e^{-\theta_2 x_i} \\
+ &=& \theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \theta_2^{n-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i}
+\eeqn
+}}{~\spc{5}}
+%
+\pagebreak
+
+\subquestionwithpoints{3} Assume Laplace's prior of indifference. State the prior for all parameters below. Use correct unambiguous notation.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+f(\theta_1, \theta_2, \theta_3) \propto 1
+\eeqn
+}}{~\spc{1}}
+%
+
+
+\subquestionwithpoints{3} The posterior is denoted $f(\theta_1, \theta_2, \theta_3~|~\x)$. Find its kernel.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+f(\theta_1, \theta_2, \theta_3~|~\x) &\propto& f(\x; \theta_1, \theta_2, \theta_3) f(\theta_1, \theta_2, \theta_3) \\
+&=& \parens{\theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \theta_2^{n-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i}}(1) \\
+&=& \theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \theta_2^{n-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i}
+\eeqn
+}}{~\spc{5}}
+%
+
+\subquestionwithpoints{2} Circle one: this kernel is the kernel of a distribution which is ... \quad known \quad /  \quad \iftoggle{solutions}{\inred{unknown}}{unknown}
+
+\subquestionwithpoints{4} We wish to create a Gibbs sampler now. Find the conditional distribution $f(\theta_1~|~\x, \theta_2, \theta_3)$ and give its brand name. Note that $\theta_1$ is a mean time and thus it's greater than 0.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+f(\theta_1~|~\x, \theta_2, \theta_3) \propto \theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \propto \text{Gamma}\parens{\theta_3 + 1, \sum_{i=1}^{\theta_3} x_i}
+\eeqn
+}}{~\spc{3.5}}
+%
+
+\subquestionwithpoints{4} Find the conditional distribution $f(\theta_2~|~\x, \theta_1, \theta_3)$ and give its brand name. Note that $\theta_2$ is a mean time and thus it's greater than 0.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+f(\theta_2~|~\x, \theta_2, \theta_3) \propto \theta_2^{n-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i} \propto \text{Gamma}\parens{n - \theta_3 + 1, \sum_{i=\theta_3 + 1}^{n} x_i}
+\eeqn
+}}{~\spc{3.5}}
+%
+\pagebreak
+
+\subquestionwithpoints{6} Find the conditional distribution $p(\theta_3~|~\x, \theta_1, \theta_2)$. Assume the parameter space of $\theta_3$ is $\braces{1,2, \ldots, n-1}$.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+p(\theta_3~|~\x, \theta_1, \theta_2) &\propto& \theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \theta_2^{-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i} \\
+\text{Normalizing to sum to one,}~~ p(\theta_3~|~\x, \theta_1, \theta_2) &=& \frac{\theta_1^{\theta_3} e^{-\theta_1 \sum_{i=1}^{\theta_3} x_i} \theta_2^{-\theta_3} e^{-\theta_2 \sum_{i=\theta_3 + 1}^{n} x_i}}{\sum_{t=1}^{n-1} \theta_1^{t} e^{-\theta_1 \sum_{i=1}^{t} x_i} \theta_2^{-t} e^{-\theta_2 \sum_{i=t + 1}^{n} x_i}}
+\eeqn
+}}{~\spc{8}}
+
+
+\subquestionwithpoints{3} Assume all conditional distributions are correct. We run the Gibbs Sampler for 10,000 runs and burn appropriately. Then we look at the autocorrelations for all chains (see next page). At what point should we thin if we wish to retain as many iterations as possible?
+%
+\iftoggle{solutions}{\inred{
+\beqn
+5
+\eeqn
+}}{~\spc{0.5}}
+%
+
+
+\subquestionwithpoints{3} After thinning, how many samples would be lift in the Gibbs chains approximately? (Assume we burned a very small number of iterations).
+%
+\iftoggle{solutions}{\inred{
+\beqn
+2000
+\eeqn
+}}{~\spc{0.5}}
+%
+\pagebreak
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=7in]{autocorrelations.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+
+
+
+\subquestionwithpoints{3} Assume we thinned appropriately. Here is the histogram of the samples of $\theta_3$ given $\x$. What is your point estimate of $\theta_3$? Approximate it from the samples. No need to justify. 
+%
+\iftoggle{solutions}{\inred{
+\beqn
+29
+\eeqn
+}}{~\\~\\Your answer: }
+%
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5in]{theta3s.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+\subquestionwithpoints{4} Here is the histogram of the samples of $\theta_1$ given $\x$. Provide a 95\% CR for $\theta_1$. Approximate it from the samples. No need to justify. 
+%
+\iftoggle{solutions}{\inred{
+\beqn
+[0.3, 0.8]
+\eeqn
+}}{~\\~\\Your answer: }
+%
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5in]{theta1s.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+\subquestionwithpoints{4} Here is the histogram of the samples of $\theta_1$ given $\x$ minus the samples of $\theta_2$ given $\x$. Provide a decision on $H_0: \theta_1 = \theta_2$. No need to justify. 
+%
+\iftoggle{solutions}{\inred{
+\beqn
+\text{Reject $H_0$}
+\eeqn
+
+}}{~\\~\\Your answer: }
+%
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5in]{diffs.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+\end{enumerate}
+\pagebreak
+
+\problem We collect data on yearly returns (in percentage) of two financial assets. The returns come from $DGP_1$ and $DGP_2$ respectively. The sample sizes are $n_1 = 17$ and $n_2 = 37$. Some statistics are as follows: $\xbar_1 = 6.17$, $s_1 = 1.91$, $\xbar_2 = 6.28$, $s_2 = 3.09$. 
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} We run a two-sample permutation test. What is the null hypothesis?
+%
+\iftoggle{solutions}{\inred{
+\beqn
+H_0: DGP_1 = DGP_2
+\eeqn
+}}{~\spc{1}}
+%
+
+\subquestionwithpoints{4} If we were to run all the permutation samples, how many samples would there be? You can answer using any well-known mathematical notation. You do not need to explicitly provide the number itself.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+\binom{17+37}{17} = \binom{17+37}{37} = \binom{54}{17} = \binom{54}{37}
+\eeqn
+}}{~\spc{1.5}}
+
+
+\subquestionwithpoints{4} We run a permutation test using $B = 10^5$ with the test statistic defined as $\xbar_1 - \xbar_2$. Below is a histogram of the samples. 
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=6in]{xbar_diffs.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+Test the hypothesis in (a) at $\alpha = 5\%$. Justify why you retained or rejected. 
+%
+\iftoggle{solutions}{\inred{
+~\\~\\ Retain $H_0$. The true test statistic from the raw data is $\xbar_1 - \xbar_2 = -0.11$ which falls within a 95\% RET which estimated above looks to be about $\bracks{-1.5,1.5}$.
+}}{~\spc{6}}
+\pagebreak
+
+
+\subquestionwithpoints{4} We run a permutation test using $B = 10^5$ with the test statistic defined as $s_1 - s_2$. Below are some quantiles for all the $B$ test statistics:
+
+\begin{verbatim}
+> quantile(test_stats, c(0.025, 0.975))
+     2.5%     97.5% 
+-1.241878  1.264630    
+\end{verbatim}
+
+Test the hypothesis in (a) at $\alpha = 5\%$. Justify why you retained or rejected. 
+%
+\iftoggle{solutions}{\inred{
+~\\~\\ 
+Reject $H_0$. The true test statistic from the raw data is $s_1 - s_2 = -1.18$ which falls outside of the 95\% RET given above.
+}}{~\spc{6}}
+
+\subquestionwithpoints{2} Circle one: did you have to make any parametric assumptions to run the test in (d)? \quad yes \quad /  \quad \iftoggle{solutions}{\inred{no}}{no}
+
+\subquestionwithpoints{2} The tests in both (c) and (d) share the same $H_0$. Circle one: do the tests in (c) and (d) share the same power? \quad yes \quad /  \quad \iftoggle{solutions}{\inred{no}}{no}
+
+\end{enumerate}
+\pagebreak
+
+\problem We are interested in the differential survival (measured in days) of lung cancer patients by the amount of daily calories they consume in their diet. There are $n = 181$ total subjects in the study. Group 1 is those that consume more than 1200 per day (and there are $n_1 = 32$) and the number that consume 1000 calories or less per day is $n_2 = 149$. Below are the KM curves. The + signs indicate a censored observation.
+
+\vspace{-0.55cm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=6.0in]{kms.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{6} Assume for this question only there are \textit{no censored observations} (even though we know it's not true). Provide an approximate 95\% CI for survival more than 750 days in Group 2 (those that consume less than or equal to 1200 calories per day) to the nearest three digits.
+
+%
+\iftoggle{solutions}{\inred{
+\beqn
+CI_{S(y), 1-\alpha} &\approx& \bracks{\doublehat{S}(y) \pm z_{1- \overtwo{\alpha}} \sqrt{\frac{\doublehat{S}(y) (1 - \doublehat{S}(y))}{n}}~} \\
+CI_{S(750), 95\%} &\approx& \bracks{0.12 \pm 1.96 \sqrt{\frac{0.12 (1 - 0.12)}{149}}~} = \bracks{0.068, 0.172}
+\eeqn
+}}{~\spc{5}}
+\pagebreak
+
+\subquestionwithpoints{2} Circle one: do the censored observations need to have the same observed survival times? \quad yes \quad /  \quad \iftoggle{solutions}{\inred{no}}{no}
+
+\subquestionwithpoints{3} Circle one: the observation with the greatest value for group 2 is censored? \quad \iftoggle{solutions}{\inred{yes}}{yes} \quad /  \quad no
+
+\subquestionwithpoints{4} Consider the following R code
+
+\begin{verbatim}
+#n_1: number of subjects in group 1
+#n_2: number of subjects in group 2
+#y_1: survival times for group 1
+#y_2: survival times for group 2
+#c_1: censor vector for group 1
+#c_2: censor vector for group 2
+
+B = 5000
+median_diffs = array(NA, B)
+for (b in 1 : B){
+  idx_1_b = sample(1 : n_1, n_1, replace = TRUE) 
+  idx_2_b = sample(1 : n_2, n_2, replace = TRUE) 
+  y_1_b = y_1[idx_1_b]
+  c_1_b = c_1[idx_1_b]
+  y_2_b = y_2[idx_2_b]
+  c_2_b = c_2[idx_2_b]
+  km_1 = survfit2(Surv(y_1_b, c_1_b) ~ 1)
+  km_2 = survfit2(Surv(y_2_b, c_2_b) ~ 1)
+  res_1 = summary(km_1)$table
+  res_2 = summary(km_2)$table
+  median_diffs[b] = res_1["median"] - res_2["median"]
+} 
+\end{verbatim}
+
+What is (1) the type of test used here and (2) the null hypothesis?
+\iftoggle{solutions}{\inred{
+\beqn
+\text{(1) bootstrap (2) $H_0:$ the median survival in both groups are equal}
+\eeqn
+}}{~\spc{1}}
+\pagebreak
+
+
+\subquestionwithpoints{6} Below is a histogram of the $B$ values of \texttt{median\_diffs} from the previous R code. Run the test from the previous question at $\alpha = 5\%$ and justify the decision.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=6.5in]{median_diffs.pdf}
+    \label{fig:enter-label}
+\end{figure}
+\FloatBarrier
+
+\iftoggle{solutions}{\inred{
+\beqn
+\text{Retain $H_0$ since 0 is within the 95\% bootstrap CI for median differences.}
+\eeqn
+}}{~\spc{4}}
+
+\subquestionwithpoints{5} We now wish to test $H_0$: the survival DGP for group 1 is the same as the survival DGP for group 2. We use the Log Rank test. Here is some relevant numeric output:
+
+\begin{verbatim}
+                   n Observed Expected (O-E)^2/E 
+more_cal=Group 2 149      110    109.8  0.000274  
+more_cal=Group 1  32       24     24.2  0.001243  
+\end{verbatim}
+
+Make a decision on $H_0$ at $\alpha = 5\%$.
+
+\iftoggle{solutions}{\inred{
+The log rank statistic is the sum of the $(O-E)^2/E$ column which is near zero, i.e. much less than the $\chisq{1}$ cutoff at $\alpha = 5\%$ which is $1.96^2 = 3.84$. Hence we retain $H_0$.
+}}{~\spc{1}}
+\pagebreak
+
+\subquestionwithpoints{8} We now fit an iid Gamma model to group 2's survival data i.e. we assume the positive values $\y := <y_{2,1}, y_{2,2}, \ldots, y_{2,n_2}>$ were drawn from the DGP
+
+\beqn
+Y_{2,1}, Y_{2,2}, \ldots, Y_{2,n_2} \iid \text{Gamma}(\theta_1, \theta_2)
+\eeqn
+
+and we also have the censoring binary data $\bv{c} := <c_{2,1}, c_{2,2}, \ldots, c_{2,n_2}>$. Write the likelihood for the parameters. You may need to use the facts about the gamma distribution (see Problem 1). No need to simplify.
+
+\iftoggle{solutions}{\inred{
+\beqn
+\mathcal{L}(\theta_1, \theta_2; \y, \bv{c}) &=& \prod_{\braces{i: c_i = 1}} f(y_i; \theta_1, \theta_2) \prod_{\braces{i: c_i = 0}} S(y_i) \\
+&=& \prod_{\braces{i: c_i = 1}} \frac{\theta_2^{\theta_1}}{\Gamma(\theta_1)} y_i^{\theta_1 - 1} e^{-\theta_2 y_i} \prod_{\braces{i: c_i = 0}} Q(\theta_1, \theta_2 y_i) \\
+%&=& \frac{\theta_2^{m \theta_1}}{\Gamma(\theta_1)^m} \parens{\prod_{\braces{i: c_i = 1}} y_i}^{\theta_1 - 1} e^{-\theta_2 \sum_{\braces{i: c_i = 1}}  y_i} \prod_{\braces{i: c_i = 0}} Q(\theta_1, \theta_2 y_i) 
+\eeqn
+}}{~\spc{12}}
+
+
+\subquestionwithpoints{2} Circle one: does the likelihood in the previous question have a closed form solution for either parameter? \quad yes \quad /  \quad \iftoggle{solutions}{\inred{no}}{no}
+
+\end{enumerate}
+
+\end{document}
+
+
+
+\problem Benford's Law represents the distribution of the leading digit in base-10 numbers within datasets across a wide variety of natural phenomenon such as street addresses, stock prices, population numbers, etc:
+
+\beqn
+X \sim \text{Benford} := \logbaseten{\frac{x+1}{x}} \indic{x \in \braces{1, 2, \ldots, 9}}, \quad \theta_0 := \expe{X} = 3.44, \quad \sigsq_0 := \var{X} = 6.06
+\eeqn
+
+\noindent For example, here are 15 numbers sampled from Benford's Law sorted: 1\ingray{1217} 1\ingray{1426} 1\ingray{2612} 1\ingray{3368} 1\ingray{5644} 2\ingray{5311} 2\ingray{7342} 3\ingray{9332} 4\ingray{1511} 4\ingray{2632} 4\ingray{4125} 5\ingray{2322} 7\ingray{8431} 8\ingray{1673} 8\ingray{2152}. Notice how the first digit (in black) is more likely to be a 1 or 2 vs an 8 or 9.
+
+
+Let the parameter of interest be the mean value of the first digit of numeric entries (call it $\theta$). Benford's Law is used by the Internal Revenue Service (IRS) to catch people committing tax fraud since numeric entries on tax forms is known to follow Benford's law. 
+
+
+
+ 
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} Circle one: the value of $\theta$, then mean numeric value of the first digit for the fields in any individual's tax return is... \quad known \quad /  \quad \iftoggle{solutions}{\inred{unknown}}{unknown}
+
+\subquestionwithpoints{2} To catch someone cheating on their taxes, we need to prove beyond a reasonable doubt that this individual's $\theta$ is not the expectation value of Benford's Law. Thus the alternative hypothesis is $H_a: \theta \neq 3.44$. What is the null hypothesis for the parameter $\theta$?
+%
+\iftoggle{solutions}{\inred{
+\beqn
+H_0: \theta = 3.44
+\eeqn
+}}{~\spc{0}}
+%
+\subquestionwithpoints{2} The \qu{1040 form} the IRS uses has 52 numeric entries. We collect the first digit from each of these fields. Let these digits be the data $x_1, x_2, \ldots, x_{52}$. What is the value of $n$?
+\iftoggle{solutions}{\inred{
+$n = 52$
+}}{~\spc{0}}
+%
+\subquestionwithpoints{2} What estimator would you choose to estimate $\theta$? $\thetahat = $ \iftoggle{solutions}{\inred{
+$\Xbar$
+}}{~\spc{0}}
+%
+\subquestionwithpoints{2} Regardless of what answer you put for the previous question, for the remainder of this problem use $\thetahat = \Xbar$. Circle one: the distribution of this estimator is... \quad known exactly \quad /  \quad \iftoggle{solutions}{\inred{unknown}}{unknown}
+
+
+\subquestionwithpoints{5}  Compute $RET_{5\%}$, the retainment region at $\alpha = 5\%$. Remember, the full null hypothesis is that the data DGP is $\Xoneton \iid$ Benford. Round the values to the nearest two decimals.
+
+\iftoggle{solutions}{\inred{
+\beqn
+\text{RET}_{5\%} = \bracks{\theta_0 \pm z_{1-\frac{\alpha}{2}} \frac{\sigma_0}{\sqrt{n}}} = \bracks{3.44 \pm 1.96 \frac{\sqrt{6.06}}{\sqrt{52}}} = \bracks{3.44 \pm 0.67} = \bracks{2.77, 4.11}
+\eeqn\pagebreak
+}}{~\spc{6}}
+
+
+\subquestionwithpoints{2} Circle one: the RET above is... \quad exact \quad /  \quad \iftoggle{solutions}{\inred{approximate}}{approximate}
+
+\subquestionwithpoints{6} For Bob's tax return, $\xbar = 5.27$ for the 52 first digits of the numeric fields. Run the test and write a concluding sentence.
+%
+
+\iftoggle{solutions}{\inred{
+$\xbar \notin \text{RET}_{5\%}$ hence we reject $H_0$ and conclude that there is statistically significant evidence that the first digits of  Bob's numeric values on his form 1040 do not adhere to Benford's Law, i.e., Bob is cheating the IRS.
+}}{~\spc{5}}
+
+
+
+\subquestionwithpoints{3} Circle one: you could've made a ... \quad \iftoggle{solutions}{\inred{Type I error}}{Type I error} \quad /  \quad Type II error 
+
+\subquestionwithpoints{6} Fisher's approximate $p_{val}$ for this test equals $2\prob{Z > z}$ where $Z \sim \stdnormnot$. Compute the value of $z$ to the nearest two decimals.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+p_{val} &=& 2 \cprob{\thetahat > \thetahathat}{H_0} = 2\cprob{\Xbar > \xbar}{H_0} = 2 \prob{\frac{\Xbar - \theta_0}{\sigma_0 / \sqrt{n}} > \frac{\xbar - \theta_0}{\sigma_0 / \sqrt{n}}} \\
+&=& 2\prob{Z > \frac{5.27 - 3.44}{\sqrt{6.06} / \sqrt{52}}} \mathimplies  z = 5.36
+\eeqn
+}}{~\spc{5}}
+
+
+\subquestionwithpoints{6} Compute an approximate $CI_{\theta, 95\%}$ to the nearest two decimals.
+%
+
+\iftoggle{solutions}{\inred{
+\beqn
+CI_{\theta, 95\%} = \bracks{\xbar \pm z_{1-\frac{\alpha}{2}} \frac{\sigma_0}{\sqrt{n}}} = \bracks{5.27 \pm 1.96 \frac{\sqrt{6.06}}{\sqrt{n}}} = \bracks{5.27 \pm 0.67} = \bracks{4.60, 5.94}
+\eeqn\pagebreak
+}}{~\spc{6}}
+
+\subquestionwithpoints{8} When people commit fraud, they may fabricate numbers \qu{completely randomly}. This means the first digits of their numbers are drawn from the DGP:
+
+\beqn
+\Xoneton \iid U(\braces{1,2, \ldots, 9})~~\text{where}~~ \theta := \expe{X} = 5, \quad \sigsq := \var{X} = 6.67
+\eeqn
+
+How many digits $n$ would you need to detect if someone was cheating by sampling numbers randomly (via the above DGP) with probability 90\% if the null assumption is the same as previously, i.e. the DGP is $\Xoneton \iid$ Benford. Note that $z_{10\%} = -1.28$. Assume $\alpha = 5\%$. Round the result to the nearest natural number.
+
+\iftoggle{solutions}{\inred{
+% From part (f), we know that
+
+% \beqn
+% \text{RET}_{5\%} = \bracks{\theta_0 \pm z_{1-\frac{\alpha}{2}} \frac{\sigma}{\sqrt{n}}} = \bracks{3.44 \pm 1.96 \frac{\sqrt{6.06}}{\sqrt{n}}} = \bracks{3.44 - \frac{4.825}{\sqrt{n}}, 3.44 + \frac{4.825}{\sqrt{n}}}
+% \eeqn
+
+As the \qu{real} $\thetahat$ distribution is centered to the right of the $\thetahat~|~H_0$ distribution, we must equate the right bound of the retainment region (from part f) to the 10\%ile of the distribution of $\thetahat$ and solve for the sample size $n$:
+
+\beqn
+\theta_0 + z_{1-\frac{\alpha}{2}} \frac{\sigma_0}{\sqrt{n}} &=& \theta + z_{10\%} \frac{\sigma}{\sqrt{n}} \\
+3.44 + 1.96 \frac{\sqrt{6.06}}{\sqrt{n}} &=& 5 - 1.28 \frac{\sqrt{6.67}}{\sqrt{n}} \\
+1.96 \frac{\sqrt{6.06}}{\sqrt{n}} + 1.28 \frac{\sqrt{6.67}}{\sqrt{n}} &=& 1.56 \\
+\frac{8.13}{\sqrt{n}} &=& 1.56 \\
+n &=& \squared{\frac{8.13}{1.56}} = 27.165 \mathimplies n=27
+\eeqn
+
+}}{~\spc{9}}
+
+
+
+\end{enumerate}
+
+
+\problem Consider the \qu{inverse gamma} DGP, a famous rv we'll study later in class:
+
+\beqn
+\Xoneton \sim \text{InvGamma}(\theta_1, \theta_2) := \frac{\theta_2^{\theta_1}} {\Gamma(\theta_1)} x^{-\theta_1 - 1} e^{-\theta_2 / x} \indic{x>0}
+\eeqn
+
+\noindent where $\Gamma(u)$ is called the \qu{gamma} function which is $\reals \rightarrow \reals$ and ensures the Humpty-Dumpty identity. The mean and variance of this rv are given below:
+
+\beqn
+\expe{X} = \frac{\theta_2}{\theta_1 - 1}, ~~ \var{X} = \frac{\theta_2^2}{(\theta_1 - 1)^2 (\theta_1 - 2)}
+\eeqn
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} How many parameters can be targets of inference in this DGP? \iftoggle{solutions}{\inred{2}\pagebreak}{~\spc{1}}
+
+
+% \subquestionwithpoints{3} What is a method of moments estimator for $\var{X}$? Your answer must use notation known from class or be a function of $\Xoneton$, $n$ and fundamental constants only. 
+% %
+% \iftoggle{solutions}{\inred{
+% \beqn
+% \hat{\sigma}^2_n := \oneover{n} \sum_{i=1}^n (X_i - \Xbar)^2
+% \eeqn\pagebreak
+% }}{~\spc{3}}
+
+\subquestionwithpoints{8} Show that the method moments estimator for $\theta_1$ is $\hat{\theta}_1^{MM} = \frac{2\muhat_2 -\muhat_1^2}{\muhat_2 - \muhat_1^2}$.
+%
+\iftoggle{solutions}{\inred{
+\beqn
+\mu_1 &:=& \expe{X} = \frac{\theta_2}{\theta_1 - 1} \mathimplies \theta_2 = \mu_1 (\theta_1 - 1) \\
+\mu_2 - \mu_1^2 &:=& \expe{X^2} - \expe{X}^2 = \var{X} = \frac{\theta_2^2}{(\theta_1 - 1)^2 (\theta_1 - 2)} \\
+&=& \frac{(\mu_1 (\theta_1 - 1))^2}{(\theta_1 - 1)^2 (\theta_1 - 2)} \\
+&=& \frac{\mu_1^2}{\theta_1 - 2} \\
+\mathimplies \theta_1 - 2 &=& \frac{\mu_1^2}{\mu_2 - \mu_1^2} \\
+\mathimplies \theta_1 &=& \frac{\mu_1^2}{\mu_2 - \mu_1^2} + 2 = \frac{\mu_1^2}{\mu_2 - \mu_1^2} + 2 \frac{\mu_2 - \mu_1^2}{\mu_2 - \mu_1^2} \mathimplies \hat{\theta}_1^{MM} = \frac{2\muhat_2 -\muhat_1^2}{\muhat_2 - \muhat_1^2}
+\eeqn
+
+That completes the problem. But we'll need $\hat{\theta}_2^{MM}$ for the next problem, so we'll derive it here now by substituting $\hat{\theta}_1^{MM}$ for $\theta_1$:
+
+\beqn
+\theta_2 &=& \mu_1 (\theta_1 - 1) \\
+&=& \mu_1 \parens{\frac{2\mu_2 -\mu_1^2}{\mu_2 - \mu_1^2} - 1} = \mu_1 \parens{\frac{2\mu_2 -\mu_1^2}{\mu_2 - \mu_1^2} - \frac{\mu_2 - \mu_1^2} {\mu_2 - \mu_1^2}} \\
+\mathimplies \hat{\theta}_2^{MM} &=& \frac{\muhat_1\muhat_2}{\muhat_2 - \muhat_1^2}
+\eeqn
+}}{~\spc{12}}
+
+
+\subquestionwithpoints{2} Circle one: as $n$ gets larger, the $\mse{\hat{\theta}_2^{MM}}$ ... \iftoggle{solutions}{\inred{decreases}}{decreases}\quad / \quad increases
+
+\subquestionwithpoints{3} Let $\x = <0.918, 0.386, 0.395, 0.553, 1.643, 0.536>$. Using the method of moments estimation technique, find the estimates for the two parameters $\doublehat{\theta}_1^{MM}$ and $\doublehat{\theta}_2^{MM}$. Round to three decimals.
+
+\iftoggle{solutions}{\inred{
+We first estimate the moments and then substitute
+
+\beqn
+\muhathat_1 = \oneover{n} \sum_{i=1}^n x_i = 0.7385, \quad\quad \muhathat_2 = \oneover{n} \sum_{i=1}^n x_i^2 = 0.7400 \\
+\doublehat{\theta}_1^{MM} = \frac{2\muhathat_2 -\muhathat_1^2}{\muhathat_2 - \muhathat_1^2} = 4.802, \quad\quad 
+\doublehat{\theta}_2^{MM} = \frac{\muhathat_1\muhathat_2}{\muhathat_2 - \muhathat_1^2} = 2.807
+\eeqn\pagebreak
+}}{~\spc{9}}
+
+
+
+\subquestionwithpoints{8} Assume we now know that $\theta_1 = 5$ going forward in this problem. Show that the maximum likelihood estimator for the second parameter for $n$ draws from this inverse gamma DGP is $\thetahatmle_2 = 5n \inverse{\sum_{i=1}^n X_i^{-1}}$.
+
+\iftoggle{solutions}{\inred{
+\beqn
+\mathcal{L} &=& \prod_{i=1}^n \frac{\theta_2^{5}} {\Gamma(5)} X_i^{-5 - 1} e^{-\theta_2 / X_i} = \frac{\theta_2^{5n}} {\Gamma(5)^n} e^{-\theta_2 \sum_{i=1}^n \oneover{X_i}} \prod_{i=1}^n X_i^{-6} \\
+\ell &=& 5n \natlog{\theta_2} - n \natlog{\Gamma(5)}-\theta_2 \sum_{i=1}^n \oneover{X_i} + \natlog{\prod_{i=1}^n X_i^{-6}} \\
+\ell' &=& \frac{5n}{\theta_2} - \sum_{i=1}^n \oneover{X_i} ~~{\buildrel set \over =}~~ 0 \mathimplies \frac{5n}{\theta_2} = \sum_{i=1}^n \oneover{X_i} \mathimplies \thetahatmle_2 = \frac{5n}{\displaystyle\sum_{i=1}^n X_i^{-1}}
+\eeqn
+}}{~\spc{12}}
+
+% \subquestionwithpoints{3} Assume the dataset from part (d). Using the maximum likelihood estimation technique, find the estimate for the second parameter, $\thetahathatmle_2$. Round to three decimals.
+
+% \iftoggle{solutions}{\inred{
+% \beqn
+% \thetahathatmle_2 &=& \frac{5n}{\displaystyle\sum_{i=1}^n x_i^{-1}} = \frac{5(6)}{\oneover{0.918} + \ldots + \oneover{0.536}} = 2.859
+% \eeqn
+% }}{~\spc{5}}
+
+% \subquestionwithpoints{3} Provide two reasons \text{in English} why $\thetahathatmle_2$ will likely be more accurate than $\doublehat{\theta}_2^{MM}$.
+
+
+% \iftoggle{solutions}{\inred{
+% \begin{enumerate}[1.]
+%     \item When computing $\thetahathatmle_2$ we assumed a value of $\theta_1$ which was not assumed when computing $\doublehat{\theta}_2^{MM}$.
+%     \item Maximum likelihood estimators generally have smaller error than method of moments estimators.
+% \end{enumerate}
+% }}{~\spc{3}}
+
+
+\subquestionwithpoints{6} Find the Cramer-Rao Lower Bound for any unbiased estimator for $\theta_2$.
+
+\iftoggle{solutions}{\inred{
+Using the log likelihood $\ell'$ from (e), we continue:
+
+\beqn
+\ell'' &=& -\frac{5n}{\theta_2^2} \\
+I(\theta_2) &=& \expe{-\ell''} = \expe{-\parens{-\frac{5n}{\theta_2^2}}} = \frac{5n}{\theta_2^2} \\
+\var{\thetahat_2} &\geq& \overn{I(\theta_2)^{-1}} = \frac{\inverse{\frac{5n}{\theta_2^2}}}{n} = \frac{\theta_2^2}{25n^2}
+\eeqn\pagebreak
+}}{~\spc{12}}
+
+\end{enumerate}
+
+\problem We are trying to prove that less than 2\% of all electronic devices a certain company manufactures are defective. Let $\theta$ denote the real proportion of defective devices.
+
+
+
+\begin{enumerate}[(a)]
+
+\subquestionwithpoints{2} What is the null hypothesis? \iftoggle{solutions}{\inred{$H_0: \theta \geq 0.02$}}{~\spc{0}}
+
+\subquestionwithpoints{2} We now sample and record if the device is defective or not. What sampling procedure should be employed to ensure the results can be believed for the entire manufacturing process? \iftoggle{solutions}{\inred{simple random sample (SRS)}}{~\spc{0.5}}
+
+\subquestionwithpoints{3} We sample $n=300$ according to the procedure given by the correct answer for (b). What is the DGP this sample was realized from?
+%
+\iftoggle{solutions}{\inred{
+\beqn
+\Xoneton \iid \bernoulli{\theta}
+\eeqn
+}}{~\spc{1}}
+
+
+\subquestionwithpoints{5} We choose to use the binomial exact test. Below is a table of the PDF of the $\binomial{300}{0.02}$ rv.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{r|rrrrrrrrrrr}
+  \hline
+ $x$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ 
+  \hline 
+  $p(x)$ & 0.002 & 0.014 & 0.044 & 0.088 & 0.134 & 0.162 & 0.162 & 0.139 & 0.104 & 0.069 & 0.041
+\end{tabular}
+\end{table}~\spc{-0.5}
+
+Find the three smallest possible nonzero sizes of the binomial exact test each to the nearest three digits.
+
+\iftoggle{solutions}{\inred{
+The three possible sizes are the three left tails which are the CDF values $F(0), F(1), F(2)$ which are $0.002, 0.016, 0.060$.
+}}{~\spc{2}}
+
+
+\subquestionwithpoints{5}  Find $RET_{5\%}$, the retainment region at $\alpha = 5\%$. 
+
+\iftoggle{solutions}{\inred{
+Since $\alpha=5\%$, we cannot use $\braces{2,3, \ldots, 100}$ as this would result in a size of 6\%. Thus, we must use $\braces{1, 2, 3, \ldots, 100}$ resulting in a size of 1.6\% as it's the largest size $\leq \alpha$.\pagebreak
+}}{~\spc{6}}
+
+\subquestionwithpoints{5}  Of the 300 sampled devices, 3 were defective. Run the test. No need to write a concluding sentence.
+
+\iftoggle{solutions}{\inred{
+Since $3 \in RET_{5\%}$, we retain $H_0$.
+}}{~\spc{3}}
+ 
+\subquestionwithpoints{3} If you don't believe the result of this test but you believe the sampling was done correctly, what is a legitimate criticism of the experiment? \iftoggle{solutions}{\inred{The sample size was insufficiently large, i.e., the test was underpowered.}}{~\spc{2}}
+
+
+\end{enumerate}
+\end{document}
+
+
+%%%%clinical significance!
+
