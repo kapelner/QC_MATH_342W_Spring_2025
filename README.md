@@ -29,15 +29,15 @@ My theory lectures are following my previous class notes (see [here](https://git
 ## Theory Homeworks
 
 <!-- 
-* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf) (due 5/15 pushed to your github repo)
-* Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf) (due 4/14 pushed to your github repo)-->
+* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf) (due 5/15 pushed to your github repo)-->
+* Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf) (due 4/21 pushed to your github repo)
 * Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf) (due 3/19 6PM pushed to your github repo)
 * Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf) (due 2/28 noon pushed to your github repo)
 * Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw01/hw01t.pdf) (due noon 2/7 noon pushed to your github repo)
 
 ## Writing Assignments
 
-* Modeling Essay [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_revised.pdf) (draft due 3/30 11:59PM by email, revision due 10d after draft is graded - this date is different for everyone) [(example essay 1)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_example_1.pdf) [(example essay 2)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_example_2.pdf)
+* Modeling Essay [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_revised.pdf) (draft due 4/2 noon by email, revision due 10d after draft is graded - this date is different for everyone) [(example essay 1)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_example_1.pdf) [(example essay 2)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/modeling_essay_example_2.pdf)
 * Final Project [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/final_project.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/writing_assignments/final_project.pdf) (due 5/22 11:59PM by email)
 
 ## Exams

@@ -12,7 +12,7 @@
 \author{Professor Adam Kapelner} %STUDENTS: write your name here
 
 \iftoggle{professormode}{
-\date{Due 11:59PM April 14 \\ \vspace{0.5cm} \small (this document last updated \currenttime~on \today)}
+\date{Due 11:59PM April 21 \\ \vspace{0.5cm} \small (this document last updated \currenttime~on \today)}
 }
 
 \renewcommand{\abstractname}{Instructions and Philosophy}
@@ -43,9 +43,9 @@ NAME: \line(1,0){380}
 }
 
 
-\problem{These are questions about the rest of Silver's book, chapters 7--11. You can skim chapter 10 as it is not so relevant for the class. For all parts in this question, answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t, z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p, x_{\cdot 1}, \ldots, x_{\cdot p}$, $x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.) as well as in-class concepts (e.g. simulation, validation, overfitting, etc) and also we now have $f_{pr}, h^*_{pr}, g_{pr}, p_{th}$, etc from probabilistic classification as well as different types of validation schemes).
+\problem{These are questions about Silver's book, chapters 7--11. You can skim chapter 10 as it is not so relevant for the class. For all parts in this question, answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t, z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p, x_{\cdot 1}, \ldots, x_{\cdot p}$, $x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.) as well as in-class concepts (e.g. simulation, validation, overfitting, etc) and also we now have $f_{pr}, h^*_{pr}, g_{pr}, p_{th}$, etc from probabilistic classification as well as different types of validation schemes).
 
-Note: I will not ask questions in this assignment about Bayesian calculations and modeling (a large chunk of Chapters 8 and 10) as this is the subject of Math 341/343. }
+Note: I will not ask questions in this assignment about Bayesian calculations and modeling (a large chunk of Chapters 8 and 10) as this is the subject of Math 341/343. We also won't cover chapters 12-13 and the conclusion on the homework.}
 
 
 \begin{enumerate}
@@ -138,13 +138,13 @@ What do we mean by \qu{feedback mechanisms} in the context of this class?}\spc{2
 
 \intermediatesubproblem{If, $\x_*\b = 3.1415$ where $\b$ is the result of the probit regression fit, what is the probability estimate that $y_*=1$?}\spc{2}
 
-\easysubproblem{In probability estimation modeling, what is the formula for the Brier Score performance metric? Prove the Brier score is always non-positive.}\spc{1}
+\easysubproblem{In probability estimation modeling, what is the formula for the Brier Score performance metric? Prove the Brier score is always non-positive.}\spc{2}
 
-\easysubproblem{In probability estimation modeling, what is the formula for the Log Scoring Rule performance metric? Prove the Log Scoring Rule is always non-positive.}\spc{1}
+\easysubproblem{In probability estimation modeling, what is the formula for the Log Scoring Rule performance metric? Prove the Log Scoring Rule is always non-positive.}\spc{2}
 
 \hardsubproblem{Generalize linear probability estimation to the case where $\mathcal{Y} = \braces{C_1, C_2, C_3}$, i.e. a nominal variable with $L=3$ levels.
 
-Assume the logistic link function. Write down the objective function that is argmax'd over the parameters (you define what these parameters are --- that is part of the question). Once you get the answer you can see how this easily goes to $L > 3$, an arbirtrary\footnote{Note: The algorithm for general $L$ is known as all of the following: \qu{multinomial logistic regression}, \qu{polytomous LR}, \qu{multiclass LR}, \qu{softmax regression}, \qu{multinomial logit} (mlogit), the \qu{maximum entropy} (MaxEnt) classifier, and the \qu{conditional maximum entropy model}. You can inflate your resume with lots of redundant jazzy terms by doing this one question!} number of response levels.\spc{11}}\pagebreak
+Assume the logistic link function. Write down the objective function that is argmax'd over the parameters (you define what these parameters are --- that is part of the question). Once you get the answer you can see how this easily goes to $L > 3$, an arbirtrary\footnote{Note: The algorithm for general $L$ is known as all of the following: \qu{multinomial logistic regression}, \qu{polytomous LR}, \qu{multiclass LR}, \qu{softmax regression}, \qu{multinomial logit} (mlogit), the \qu{maximum entropy} (MaxEnt) classifier, and the \qu{conditional maximum entropy model}. You can inflate your resume with lots of redundant jazzy terms by doing this one question!} number of response levels.\spc{16}}\pagebreak
 
 For the next two questions, let $n_1 := \sum \indic{y_i = 1}$ and $n_0 := \sum \indic{y_i = 0}$ so that $n = n_0 + n_1$. Then assume $n_1 \neq n_0$. This is equivalent to letting $n_1 = cn$ and $n_0 = (1-c)n$ and assuming $c \in [0,1]/\braces{\half}$.
 
@@ -238,7 +238,6 @@ For the next two questions, let $n_1 := \sum \indic{y_i = 1}$ and $n_0 := \sum \
 \end{enumerate}
 
 
-
 \problem{These are some questions related to the CART algorithms.}
 
 \begin{enumerate}
@@ -259,6 +258,7 @@ For the next two questions, let $n_1 := \sum \indic{y_i = 1}$ and $n_0 := \sum \
 
 
 \end{enumerate}
+
 
 
 
