@@ -4,230 +4,233 @@ author: "Your Name Here"
 output: pdf_document
 ---
 
-#Model Selection with Three Splits: Select from M models
 
-We employ the diamonds dataset and specify M models nested from simple to more complex. We store the models as strings in a list (i.e. a hashset)
+#Visualization with the package ggplot2
+
+I highly recommend using the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) as a reference resource. You will see questions that say "Create the best-looking plot". Among other things you may choose to do, remember to label the axes using real English, provide a title and subtitle. You may want to pick a theme and color scheme that you like and keep that constant throughout this lab. The default is fine if you are running short of time.
+
+Load up the `GSSvocab` dataset in package `carData` as `X` and drop all observations with missing measurements. This will be a very hard visualization exercise since there is not a good model for vocab.
 
 ```{r}
-?ggplot2::diamonds
-model_formulas = c(
-  "carat",
-  "carat + cut",
-  "carat + cut + color",
-  "carat + cut + color + clarity",
-  "carat + cut + color + clarity + x + y + z",
-  "carat + cut + color + clarity + x + y + z + depth",
-  "carat + cut + color + clarity + x + y + z + depth + table",
-  "carat * (cut + color + clarity) + x + y + z + depth + table",
-  "(carat + x + y + z) * (cut + color + clarity) + depth + table",
-  "(carat + x + y + z + depth + table) * (cut + color + clarity)",
-  "(poly(carat, 2) + x + y + z + depth + table) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + depth + table) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2)) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2) + log(carat) + log(x) + log(y) + log(z)) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2) + log(carat) + log(x) + log(y) + log(z) + log(depth)) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2) + log(carat) + log(x) + log(y) + log(z) + log(depth) + log(table)) * (cut + color + clarity)",
-  "(poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2) + log(carat) + log(x) + log(y) + log(z) + log(depth) + log(table)) * (cut + color + clarity + poly(carat, 2) + poly(x, 2) + poly(y, 2) + poly(z, 2) + poly(depth, 2) + poly(table, 2) + log(carat) + log(x) + log(y) + log(z) + log(depth) + log(table))"
+#TO-DO
+```
+
+Briefly summarize the documentation on this dataset. What is the data type of each variable? What do you think is the response variable the collectors of this data had in mind?
+
+#TO-DO
+
+Create two different plots and identify the best-looking plot you can to examine the `age` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best looking plot you can to examine the `vocab` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `ageGroup` variable by `gender`. Does there appear to be an association? There are many ways to do this.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `vocab` variable by `age`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Add an estimate of $f(x)$ using the smoothing geometry to the previous plot. Does there appear to be an association now?
+
+```{r}
+#TO-DO
+```
+
+Using the plot from the previous question, create the best looking plot overloading with variable `gender`. Does there appear to be an interaction of `gender` and `age`?
+
+```{r}
+#TO-DO
+```
+
+
+Using the plot from the previous question, create the best looking plot overloading with variable `nativeBorn`. Does there appear to be an interaction of `nativeBorn` and `age`?
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best-looking plot you can to examine the `vocab` variable by `educGroup`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Using the best-looking plot from the previous question, create the best looking overloading with variable `gender`. Does there appear to be an interaction of `gender` and `educGroup`?
+
+```{r}
+#TO-DO
+```
+
+Using facets, examine the relationship between `vocab` and `ageGroup`. You can drop year level `(Other)`. Are we getting dumber?
+
+```{r}
+#TO-DO
+```
+
+#Rcpp and optimizing R
+
+Write a function `dot_product_R` in R that takes in two vectors `v1` and `v2` and returns their dot product.
+
+```{r}
+#TO-DO
+```
+
+Write a function `dot_product_cpp` in C++ and make sure it compiles.
+
+```{r}
+cppFunction('
+  double dot_product_cpp(NumericVector v1, NumericVector v2) {
+    #TO-DO
+  }
+')
+```
+
+Create two vectors of standard normal realizations with length `n=1e6` and test the different in speed.
+
+```{r}
+n = 1e6
+v1 = rnorm(n)
+v2 = rnorm(n)
+
+pacman::p_load(microbenchmark)
+microbenchmark(
+  dot_product_R(v1, v2), 
+  dot_product_cpp(v1, v2),
+  times = 10
 )
-model_formulas = paste0("price ~ ", model_formulas)
-M = length(model_formulas)
 ```
 
-In order to use the formulas with logs we need to eliminate rows with zeros in those measurements:
-
-```{r}
-diamonds_cleaned = ggplot2::diamonds
-diamonds_cleaned = diamonds_cleaned[
-  diamonds_cleaned$carat > 0 &
-  diamonds_cleaned$x > 0 &
-  diamonds_cleaned$y > 0 &
-  diamonds_cleaned$z > 0 &
-  diamonds_cleaned$depth > 0 &
-  diamonds_cleaned$table > 0, #all columns
-]
-```
-
-Split the data into train, select and test. Each set should have 1/3 of the total data.
-
-```{r}
-n = nrow(diamonds_cleaned)
-set.seed(1)
-train_idx = sample(1 : n, round(n / 3))
-select_idx = sample(setdiff(1 : n, train_idx), round(n / 3))
-test_idx = setdiff(1 : n, c(train_idx, select_idx))
-diamonds_train =  diamonds_cleaned[train_idx, ]
-diamonds_select = diamonds_cleaned[select_idx, ]
-diamonds_test =   diamonds_cleaned[test_idx, ]
-```
-
-Find the oosRMSE on the select set for each model. Save the number of df in each model while you're doing this as we'll need it for later.
+Implement the Gram Schmidt routine as a C++ function `gram_schmidt_cpp`.
 
 ```{r}
 #TO-DO
 ```
 
-Plot the oosRMSE by model complexity (df in model)
+Here is the implementation in R for reference taken from lab 5:
 
 ```{r}
-pacman::p_load(ggplot2)
-#TO-DO
+gram_schmidt_R = function(X){
+  #first create orthogonal matrix
+  V = matrix(NA, nrow = nrow(X), ncol = ncol(X))
+  V[, 1] = X[, 1]
+  
+  for (j in 2 : ncol(X)){
+    V[, j] = X[, j]
+    
+    for (k in 1 : (j-1)){
+      v_k = V[, k, drop = FALSE]
+      V[, j] = V[, j, drop = FALSE] - (t(t(v_k)) %*% t(v_k) / sum(v_k^2)) %*% t(t(X[, j])) #i.e. the orthogonal projection of X[, j] onto v_k
+    }
+  }
+  
+  Q = matrix(NA, nrow = nrow(X), ncol = ncol(X))
+  for (j in 1 : ncol(X)){
+    Q[, j] = V[, j] / sqrt(sum(V[, j]^2))
+  }
+  Q
+}
 ```
 
-Select the best model by oosRMSE and find its oosRMSE on the test set.
-
+Now let's see how much faster C++ is by running it on the boston housing data design matrix
 ```{r}
-#TO-DO
-```
-
-Did we overfit the select set? Discuss why or why not.
-
-#TO-DO
-
-Create the final model object `g_final`.
-
-```{r}
-#TO-DO
-```
-
-
-#Model Selection with Three Splits: Hyperparameter selection
-
-We will use an algorithm that I historically taught in 324W but now moved to 343 so I can teach it more deeply using the Bayesian topics from 341. The regression algorithm is called "ridge" and it involves solving for the slope vector via:
-
-b_ridge := (X^T X + lambda I_(p+1))^-1 X^T y
-
-Note how if lambda = 0, this is the same algorithm as OLS. If lambda becomes very large then b_ridge is pushed towards all zeroes. So ridge is good at weighting only features that matter.
-
-However, lambda is a hyperparameter >= 0 that needs to be selected.
-
-We will work with the boston housing dataset except we will add 250 garbage features consisting of iid N(0,1) realizations. We will also standardize the columns so they're all xbar = 0 and s_x = 1. This is shown to be important in 343.
-
-```{r}
-rm(list = ls())
-?MASS::Boston
-y = MASS::Boston$medv
 X = model.matrix(medv ~ ., MASS::Boston)
-n = nrow(X)
-p_garbage = 250
-set.seed(1)
-X = cbind(X, matrix(rnorm(n * p_garbage), nrow = n))
-X = apply(X, 2, function(x_dot_j){
-                  (x_dot_j - mean(x_dot_j)) / sd(x_dot_j)
-                })
-X[, 1] = 1 #we standardized the intercept column which became zeroes - make it an intercept again
-dim(X)
+
+microbenchmark(
+  gram_schmidt_R(X),
+  gram_schmidt_cpp(X),
+  times = 10
+)
 ```
 
-
-Now we split it into 300 train, 100 select and 106 test. 
-
-```{r}
-set.seed(1)
-train_idx = sample(1 : n, 300)
-select_idx = sample(setdiff(1 : n, train_idx), 100)
-test_idx = setdiff(1 : n, c(train_idx, select_idx))
-#TO-DO
-```
-
-We now create a grid of M = 200 models indexed by lambda. The lowest lambda should be zero (which is OLS) and the highest lambda can be 100.
-
-```{r}
-M = 200
-lambda_grid = seq(from = 0, to = 100, length.out = M)
-```
-
-Now find the oosRMSE on the select set on all models each with their own lambda value.
+Create a variable `n` to be 10 and a vaiable `Nvec` to be 100 initially. Create a random vector via `rnorm` `Nvec` times and load it into a `Nvec` x `n` dimensional matrix.
 
 ```{r}
 #TO-DO
 ```
 
-Plot the oosRMSE by the value of lambda.
+Write a function `all_angles` that measures the angle between each of the pairs of vectors. You should measure the vector on a scale of 0 to 180 degrees with negative angles coerced to be positive.
 
 ```{r}
 #TO-DO
 ```
 
-Select the model with the best oosRMSE on the select set and find its oosRMSE on the test set.
+Plot the density of these angles.
 
 ```{r}
 #TO-DO
 ```
 
-Create the final model object `g_final`.
+Write an Rcpp function `all_angles_cpp` that does the same thing. Use an IDE if you want, but write it below in-line.
 
 ```{r}
 #TO-DO
 ```
 
-
-#Model Selection with Three Splits: Forward stepwise modeling
-
-We will use the adult data
+Test the time difference between these functions for `n = 1000` and `Nvec = 100, 500, 1000, 5000` using the package `microbenchmark`.  Store the results in a matrix with rows representing `Nvec` and two columns for base R and Rcpp.
 
 ```{r}
-rm(list = ls())
-pacman::p_load_gh("coatless/ucidata") #load from github
-data(adult)
-adult = na.omit(adult) #remove any observations with missingness
-n = nrow(adult)
-?adult
-#let's remove "education" as its duplicative with education_num
-adult$education = NULL
+Nvecs = c(100, 500, 1000, 5000)
+
+results_for_time = data.frame(
+  Nvec = Nvecs,
+  time_for_base_R = numeric(),
+  time_for_cpp = numeric()
+)
+for (i in 1 : length(Nvecs)){
+  X = matrix(rnorm(n * Nvecs[i]), nrow = Nvec)
+  results_for_time$time_for_base_R[i] = all_angles(X)
+  results_for_time$time_for_cpp[i] = all_angles_cpp(X)
+}
+
+ggplot(results_for_time) + 
+  geom_line(aes(x = Nvec, y = time_for_base_R), col = "red") +
+  geom_line(aes(x = Nvec, y = time_for_cpp), col = "blue")
 ```
 
-
-To implement forward stepwise, we need a "full model" that contains anything and everything we can possible want to use as transformed predictors. Let's first create log features of all the numeric features. Instead of pure log, use log(value + 1) to handle possible zeroes.
-
-```{r}
-skimr::skim(adult)
-#this gives us the list of numeric features to create logs
-adult$log_age = log(adult$age + 1)
-adult$log_fnlwgt = log(adult$fnlwgt + 1)
-adult$log_education_num = log(adult$education_num + 1)
-adult$log_capital_gain = log(adult$capital_gain + 1)
-adult$log_capital_loss = log(adult$capital_loss + 1)
-adult$log_hours_per_week = log(adult$hours_per_week + 1)
-```
-
-Now let's create a model matrix Xfull that contains all first order interactions. How many degrees of freedom in this "full model"?
+Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot. We wil see later how to create "long" matrices that make such plots easier.
 
 ```{r}
 #TO-DO
 ```
 
-Now let's split it into train, select and test sets. Because this will be a glm, model-building (training) will be slow, so let's keep the training set small at 2,000. Since prediction is fast, we can divide the others evenly among select and test.
-
-```{r}
-y = ifelse(adult$income == ">50K", 1, 0)
-#TO-DO
-Xfull_train =  Xfull[train_idx, ]
-Xfull_select = Xfull[select_ids, ]
-Xfull_test =   Xfull[test_idx, ]
-y_train =      y[train_idx]
-y_select =     y[select_idx]
-y_test =       y[test_idx]
-```
-
-Now let's use the code from class to run the forward stepwise modeling. As this is binary classification, let's use logistic regression and to measure model performance, let's use the Brier score. Compute the Brier score in-sample (on training set) and oos (on selection set) for every iteration of j, the number of features selected from the greedy selection procedure.
+Let `Nvec = 10000` and vary `n` to be 10, 100, 1000. Plot the density of angles for all three values of `n` on one plot using color to signify `n`. Make sure you have a color legend. This is not easy.
 
 ```{r}
 #TO-DO
 ```
 
-Plot the in-sample Brier score (in red) and oos Brier score (in blue) by the number of features used.
+Write an R function `nth_fibonnaci` that finds the nth Fibonnaci number via recursion but allows you to specify the starting number. For instance, if the sequence started at 1, you get the familiar 1, 1, 2, 3, 5, etc. But if it started at 0.01, you would get 0.01, 0.01, 0.02, 0.03, 0.05, etc.
 
 ```{r}
 #TO-DO
 ```
 
-Select the model with the best oos Brier score on the select set and find its oos Brier score on the test set.
+Write an Rcpp function `nth_fibonnaci_cpp` that does the same thing. Use an IDE if you want, but write it below in-line.
 
 ```{r}
 #TO-DO
 ```
 
-Create the final model object `g_final`.
+Time the difference in these functions for n = 100, 200, ...., 1500 while starting the sequence at the smallest possible floating point value in R. Store the results in a matrix.
+
+```{r}
+#TO-DO
+```
+
+Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot.
 
 ```{r}
 #TO-DO
