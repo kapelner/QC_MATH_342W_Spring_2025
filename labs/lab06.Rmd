@@ -71,6 +71,7 @@ Run a logistic regression of y=1 (type is "diabetic") on all variables using R's
 ```{r}
 coef(glm(y ~ X[, "glu"], family = "binomial"))
 ```
+
 Predict the probability of diabetes for someone with a blood sugar of 150.
 
 ```{r}
