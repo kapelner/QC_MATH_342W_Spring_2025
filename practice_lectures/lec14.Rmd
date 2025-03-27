@@ -4,6 +4,1207 @@ author: "Professor Adam Kapelner"
 ---
 
 
+# "Nonlinear Linear" Regression with polynomials
+
+Even though we can demonstrate "Nonlinear Linear" Regression with polynomials using glm's for probability estimation, it is easier when the response is numeric.
+
+Let's generate a polynomial model of degree 2 ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
+
+```{r}
+set.seed(1003)
+n = 25
+beta_0 = 1
+beta_1 = 0
+beta_2 = 1
+x = runif(n, -2, 5)
+#best possible model
+h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
+
+#actual data differs due to information we don't have
+epsilon = rnorm(n)
+y = h_star_x + epsilon
+
+#scatterplot it
+df = data.frame(x = x, y = y, h_star_x = h_star_x)
+pacman::p_load(ggplot2)
+basic = ggplot(df, aes(x, y)) +
+  geom_point()
+basic
+head(x)
+```
+
+Let's try to estimate with a line:
+
+```{r}
+linear_mod = lm(y ~ x)
+b_linear = summary(linear_mod)$coef
+basic + geom_abline(intercept = b_linear[1], slope = b_linear[2], col = "red")
+```
+
+The relationship is "underfit". $\mathcal{H}$ is not rich enough right now to express something close to $f(x)$. But it is better than the null model!
+
+Now let's do a polynomial regression of degree two. Let's do so manually:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2))
+head(X)
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+c(beta_0, beta_1, beta_2)
+```
+
+These are about the same as the $\beta_0, \beta_1$ and $\beta_2$ as defined in $f(x)$ the true model. In order to graph this, we can no longer use the routine `geom_abline`, we need to use `stat_function`.
+
+```{r}
+plot_function_degree_2 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2
+}
+
+basic + 
+  stat_function(fun = plot_function_degree_2, args = list(b = b), col= "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2)), col= "darkgreen")
+```
+
+Now let's try polynomial of degree 3:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2, x^3))
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+
+plot_function_degree_3 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3
+}
+
+basic + stat_function(fun = plot_function_degree_3, args = list(b = b), col = "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2, 0)), col= "darkgreen")
+```
+
+Still the same. Why? The $x^3$ term is like adding one "nonsense" predictor. One nonsense predictor marginally affects $R^2$ but it doesn't matter too much.
+
+Now let's try polynomial of degree 8:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2, x^3, x^4, x^5, x^6, x^7, x^8))
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+
+plot_function_degree_8 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 
+}
+
+basic + stat_function(fun = plot_function_degree_8, args = list(b = b), col = "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2, rep(0, 6))), col= "darkgreen")
+```
+
+We are seeing now a little bit of "overfitting" in the edge(s). We now have $p=9$ and $n=100$. We can do a lot worse!
+
+Let's learn how to do this in R first without having to resort to manual linear algebra. R has a function called "poly" that can be used *inside* formula declarations.
+
+Let's first fit the degree 2 model:
+
+```{r}
+degree_2_poly_mod = lm(y ~ poly(x, 2, raw = TRUE))
+head(model.matrix(~ poly(x, 2, raw = TRUE))) #the model matrix for this regression - just to check
+b_poly_2 = coef(degree_2_poly_mod)
+b_poly_2
+summary(degree_2_poly_mod)$r.squared
+```
+
+Let's go on a slight tangent. And look at this regression without using the raw polynomial.
+
+```{r}
+Xmm = model.matrix(~ poly(x, 2))
+head(Xmm) #the model matrix for this regression - just to check
+Xmm[, 1] %*% Xmm[, 2]
+Xmm[, 2] %*% Xmm[, 2]
+Xmm[, 2] %*% Xmm[, 3]
+Xmm[, 3] %*% Xmm[, 3]
+```
+
+Are these orthogonal polynomials? How is the `poly` function without `raw = TRUE` working to generate a model matrix?
+
+```{r}
+degree_2_orthog_poly_mod = lm(y ~ poly(x, 2))
+b_poly_2 = coef(degree_2_orthog_poly_mod)
+b_poly_2
+summary(degree_2_orthog_poly_mod)$r.squared
+```
+
+Raw or orthogonal does not affect the yhats and Rsq. They are the same as we got before! That's because the colspace is the same in both cases raw or polynomial. We use "raw" polynomials to keep them interpretable and on the same scale as the manual models we were fitting.
+
+Now let's do polynomial of degree 13:
+
+```{r}
+degree_13_poly_mod = lm(y ~ poly(x, 13, raw = TRUE))
+b_poly_13 = coef(degree_13_poly_mod)
+
+plot_function_degree_13 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
+}
+
+basic + stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")# + ylim(c(0, 25)) #+ xlim(c(-2, 5.2))
+```
+
+What's happening for small values of $x$ (and a bit for large values)? This is called [Runge's Phenomenon](https://en.wikipedia.org/wiki/Runge%27s_phenomenon) meaning that the boundary activity of high-order polynomials has very large derivatives. Let's go back to the same scale as before and see what's happening:
+
+```{r}
+basic + 
+  coord_cartesian(xlim = c(-2, 5), ylim = c(-3, 25)) + 
+  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")
+```
+
+This is terrible! Future predictions will be awful at the edges and even more awful when extrapolating beyond the edges! Let's examine this extrapolation further using another dataset.
+
+
+# Orthogonal vs raw polynomials
+
+Why is orthonormal polynomial the default? You can argue that doing a QR decomposition on the polynomial expansion and employing Q in the design matrix will change b thereby making b uninterpretable! So why use orthonormal polynomials? Here's why:
+
+```{r}
+n = 1000
+set.seed(1984)
+X = data.frame(x = c(runif(n / 2, 0, 1e-2), runif(n / 2, 0, 1e6)))
+d = 10
+num_digits = 8
+Xmm_orth = model.matrix(~ 0 + poly(x, d), X)
+colnames(Xmm_orth)[1 : d] = 1 : d
+Xmm_raw = model.matrix(~ 0 + poly(x, d, raw = TRUE), X)
+colnames(Xmm_raw)[1 : d] = 1 : d
+```
+
+Let's look at the design matrix for small values of x:
+
+```{r}
+head(as.matrix(X))
+round(head(Xmm_orth), num_digits)
+round(head(Xmm_raw), num_digits)
+```
+
+You get numerical underflow almost immediately when using the raw polynomial computations (you get it by degree 4). And thus you can't even get the OLS estimates:
+
+
+```{r}
+y = rnorm(n)
+solve(t(Xmm_raw) %*% Xmm_raw) %*% t(Xmm_raw) %*% y
+```
+
+Let's look at the design matrix for large values of x:
+
+```{r}
+tail(as.matrix(X))
+round(tail(Xmm_orth), num_digits)
+round(tail(Xmm_raw), num_digits)
+```
+
+You get numerical overflow in the design matrix (but it will happen later). But the second you start to use the design matrix with 10^59's inside...
+
+```{r}
+solve(t(Xmm_raw[800 : 1000, ]) %*% Xmm_raw[800 : 1000, ]) %*% t(Xmm_raw[800 : 1000, ]) %*% y
+```
+
+As opposed to
+
+```{r}
+solve(t(Xmm_orth) %*% Xmm_orth) %*% t(Xmm_orth) %*% y
+```
+
+No problem at all!!!
+
+So that's the reason: numerical stability. But if you need interpretability, you need raw polynomials. But if you're interpreting the model, how do you even interpret beyond degree 2???
+
+
+#Extrapolation vs Interpolation
+
+Let's take a look at the Galton Data again.
+
+```{r}
+pacman::p_load(HistData, ggplot2)
+data(Galton)
+mod = lm(child ~ parent, Galton)
+b_0 = mod$coefficients[1]
+b_1 = mod$coefficients[2]
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  xlim(63.5, 72.5) + 
+  ylim(63.5, 72.5) +
+  coord_equal(ratio = 1)
+```
+
+Let's say I want to predict child's height for parents' average height of 70in. All I do is:
+
+```{r}
+predict(mod, data.frame(parent = 70))
+```
+
+What if I want to predict for a parents' height of 5in. Is there any 12in tall human being? No... it is absurd. But nothing stops you from doing:
+
+```{r}
+predict(mod, data.frame(parent = 5))
+```
+
+That's [actually possible](https://www.guinnessworldrecords.com/news/2012/2/shortest-man-world-record-its-official!-chandra-bahadur-dangi-is-smallest-adult-of-all-time/).
+
+Look at our linear model from Euclid's perspective:
+
+```{r}
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  xlim(-20, 120) + 
+  ylim(-20, 120) +
+  coord_equal(ratio = 1)
+```
+
+What is a linear model with $p + 1 = 2$. It's just a line. When geometry was first formalized by Euclid in the Elements, he defined a line to have "breadthless length" with a straight line being a line "which lies evenly with the points on itself". By "breadthless" he meant infinite in either direction. There is no mathematical problem with predicting childrens' heights using negative parents' heights e.g.
+
+```{r}
+predict(mod, data.frame(parent = -5))
+```
+
+But this is absurd. So now we need to talk about a fundamental concept in data science we've been kind of avoiding and one that most people ignore. There are two types of prediction: interpolation and extrapolation. Interpolation is essentially the type of "prediction" we've been talking about this whole class. 
+
+Extrapolation is totally different. It's what happens when you predict outside of the range of the covariate data you've seen in $\mathbb{D}$. Extrapolation is very dangerous - your models only work based on $\mathbb{D}$. Extrapolation is prediction outside of the range you've seen before which means. You better have a good theoretical reason as to why your $\mathbb{H}$ function class will extend outside that range. Because each $\mathbb{H}$ function class will extrapolate very very differently.
+
+
+
+What happens during extrapolation? Let's look at the (a) linear model, (b) polynomial model with degree 2 and (c) polynomial with degree 13.
+
+```{r}
+degree_2_poly_mod = lm(child ~ poly(parent, 2, raw = TRUE), Galton)
+b_poly_2 = coef(degree_2_poly_mod)
+degree_13_poly_mod = lm(child ~ poly(parent, 13, raw = TRUE), Galton)
+b_poly_13 = coef(degree_13_poly_mod)
+b_poly_13[is.na(b_poly_13)] = 0
+
+plot_function_degree_2 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2
+}
+plot_function_degree_13 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
+}
+
+# xymin = 65
+# xymax = 71
+xymin = 50
+xymax = 90
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue") +
+  coord_cartesian(xlim = c(xymin, xymax), ylim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_2, args = list(b = b_poly_2), col = "red", xlim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "orange", xlim = c(xymin, xymax))
+```
+
+Besides being bad at the edges of the input space, polynomial models have *TERRIBLE* performance when you leave input space. The extrapolation risk is totally unpredictable due to Runge's phenomenon. Please do not use them if you think you'll ever extrapolate!!!
+
+# Overfitting with Polynomials
+
+Can we achieve $R^2 = 100\%$ using polynomial regression? Yes. Here's an example in one dimension. As long as the $x$ values are distinct, $n$ data points can be fit by a $n - 1$ degree polynomial. Here's an example with a few data points:
+
+```{r}
+set.seed(1003)
+n = 5
+beta_0 = 1
+beta_1 = 0
+beta_2 = 1
+x = runif(n)
+
+h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
+y = h_star_x + rnorm(n)
+#scatterplot it
+df = data.frame(x = x, y = y, h_star_x = h_star_x)
+basic = ggplot(df, aes(x, y)) +
+  geom_point()
+basic
+```
+
+Now fit polynomial models:
+
+```{r}
+degree_4_poly_mod = lm(y ~ poly(x, 5, raw = TRUE))
+b_poly_4 = coef(degree_4_poly_mod)
+
+plot_function_degree_4 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4
+}
+
+basic + stat_function(fun = plot_function_degree_4, args = list(b = b_poly_4), col = "purple")
+```
+
+Perfect fit!
+
+```{r}
+summary(degree_4_poly_mod)$r.squared
+```
+
+This is the same thing we've seen before! If $n = p + 1$, then the design matrix is square and there is no need to project onto a lower dimensional subspace. To estimate the linear model, one only needs to solve $n$ equations with $n$ unknowns.
+
+My recommendations:
+1) Keep polynomial degree low. Preferably 2. Anything past 2 is not interpretable anyway. We didn't talk about "interpretability" of models yet, but you get the idea. If you are using degree = 2, use raw polynomials so you get interpretability (see next section).
+2) Be very careful not to extrapolate: make sure future predictions have the measurements within range of the training data $\mathbb{D}$. Extrapolations are going to be very, very inaccurate. Polynomial regressions I'm sure have gotten data scientists fired before.
+
+
+# Log transformations
+
+We will be examining the diamonds dataset. Let's take a moment to read about our data. In real life, you will take more than just a moment to learn about the data. And more than just a moment to clean the data and do sanity checks. As these steps are more of the grunt work of data science (and are learned on the fly), I won't really cover them formally.
+
+```{r}
+pacman::p_load(ggplot2) #this loads the diamonds data set too
+?diamonds
+diamonds$cut =      factor(diamonds$cut, ordered = FALSE)      #convert to nominal
+diamonds$color =    factor(diamonds$color, ordered = FALSE)    #convert to nominal
+diamonds$clarity =  factor(diamonds$clarity, ordered = FALSE)  #convert to nominal
+diamonds = diamonds[sample(1 : nrow(diamonds)), ] #shuffle for better visualizations
+dim(diamonds)
+```
+
+That's a huge $n$. So, let's expect things to take a bit longer when processing.
+
+A natural increasing relationship will likely be found between weight and price. Let's see it visually:
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) + 
+  geom_point()
+```
+
+
+How good does a best guess linear relationship do?
+
+```{r}
+mod = lm(price ~ carat, diamonds)
+b = coef(mod)
+b
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+What does the intercept say about extrapolation?
+
+Let's see the best fit line $g(x)$ visually:
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) + geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green") +ylim(0, 50000)
+```
+
+Maybe the relationship between weight and price is not linear - but exponential? E.g. if the weight of a diamond doubles, maybe the price quadruples? Or linear increases in weight yield percentage increases in price. This seems plausible. 
+
+Besides the plausibility of the functional form, there is an agnostic reason to employ log y as the predictive target. Let's first examine the univariate data!
+
+
+```{r}
+skimr::skim(diamonds$price)
+```
+
+Very large standard error and very long tail which can be seed more clearly here:
+
+```{r}
+ggplot(diamonds) + geom_histogram(aes(price), binwidth = 200)
+```
+
+Let's take a look at the distribution after logging:
+
+```{r}
+ggplot(diamonds) + geom_histogram(aes(x = log(price)), binwidth = 0.01)
+```
+
+Some strange artifacts appear. Why the gap? Why is it "cut" sharply at a maximum? These are questions to ask the one who collected the data. But let's get back to the log story...
+
+Popular wisdom says logging this type of highly skewed-right distribution would possibly make the model "more linear in x". Put another way, it would be easier to "catch" (predict) the long tail since it won't be a long tail anymore after you log-transform. It would also prevent observations with large y's becoming "leverage points" i.e. points that unduly influence the model and thereby warp its ability to predict the average observation. In 343, you'll learn more reasons for why you should use log the response, but those reasons are relevant for inference so we won't discuss them here.
+
+Let's give the model with ln(y) a whirl. Maybe we'll even learn something about diamonds. The way to create such a model is to simply fit an OLS model to log y. This is called a log-linear model. Since this is a pretty standard thing to do so R's formula notation has it built-in as follows:
+
+```{r}
+log_linear_mod = lm(log(price) ~ carat, diamonds)
+b = coef(log_linear_mod)
+b
+```
+
+Let's see what this looks like.
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green") + ylim(6, 12)
+```
+
+It looks very bad if carat is large. That means our little theory about carats getting larger yielding multiples of price doesn't correspond to reality.
+
+How did we do?
+
+```{r}
+summary(log_linear_mod)$r.squared
+summary(log_linear_mod)$sigma
+```
+
+Look at that RMSE! That dropped like a rock! Is that real?
+
+No. RMSE before is in the units of y. And now y is now in ln($). So this RMSE and the previous RMSE are *not* comparable.
+
+The $R^2$ are *not* comparable either. Even though they're on a [0, 1] scale in both models, the SST's are different so you're measuring the proportion of a different variance.
+
+Let's attempt to compare apples-apples.
+
+```{r}
+log_y_hat = log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+What does this mean? It means this was a bad idea. Those residuals for large carats are insanely large. They're wrong on a log scale! Which means they're off by orders of magnitude. Working with logged y is dangerous business if you're wrong! Before you were off by a few thousand dollars; now you're off by millions. For example. Let's look at a large diamond:
+
+```{r}
+xstar = diamonds[diamonds$carat > 5, ][1, ]
+xstar$price
+predict(mod, xstar)
+exp(predict(log_linear_mod, xstar))
+```
+
+That's a pretty bad residual!
+
+How about log-log model? 
+
+```{r}
+log_log_linear_mod = lm(log(price) ~ log(carat), diamonds)
+b = coef(log_log_linear_mod)
+b
+```
+
+Let's see what it looks like:
+
+```{r}
+ggplot(diamonds, aes(x = log(carat), y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Well look at that! That's a nice looking model. (Note that the slope coefficients in log-log models, i.e. b_2 here, are called "elasticity" in Econ 382 as it measures how the relative change in x affects the relative change in y).
+
+How are our metrics?
+
+```{r}
+summary(log_log_linear_mod)$r.squared
+summary(log_log_linear_mod)$sigma
+```
+
+Let's see apples-to-apples to the natural y model.
+
+```{r}
+log_y_hat = log_log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+This is on-par with the vanilla OLS model, but still doesn't "beat it". There was no guarantee that we would be "beat it" even though we used procedures that are reasonable and popular!
+
+Let's repeat this entire exercise using the length of the diamond. The length of the diamond feature is confusingly named "x" in the dataset. It is an "x" but it's also the diamond's "x"!!!
+
+```{r}
+ggplot(diamonds, aes(x = x, y = price)) + 
+  geom_point()
+```
+
+Besides the non-linear relationship, what else do you see? Mistakes in the dataset! Can a real diamond have zero length?? Yes. This is the real world. There are mistakes all the time.
+
+Let's kill it! How many are we dealing with here?
+
+```{r}
+nrow(diamonds[diamonds$x == 0, ])
+```
+
+
+```{r}
+diamonds = diamonds[diamonds$x != 0, ]
+```
+
+What's the deal with the x variable now?
+
+```{r}
+skimr::skim(diamonds$x)
+```
+
+How good does a best guess linear relationship do?
+
+```{r}
+mod = lm(price ~ x, diamonds)
+b = coef(mod)
+b
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Let's see the best fit line $g(x)$ visually:
+
+```{r}
+ggplot(diamonds, aes(x = x, y = price)) + geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Again we got some bad extrapolation going on which we can't fix using a purely linear modeling strategy.
+
+Let's log-linearize it and see how we do.
+
+```{r}
+log_linear_mod = lm(log(price) ~ x, diamonds)
+b = coef(log_linear_mod)
+ggplot(diamonds, aes(x = x, y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+How did we do? Ensure it's apples-apples.
+
+```{r}
+log_y_hat = log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+Still not better. Log-log?
+
+```{r}
+log_log_linear_mod = lm(log(price) ~ log(x), diamonds)
+b = coef(log_log_linear_mod)
+ggplot(diamonds, aes(x = log(x), y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+How did we do? 
+
+```{r}
+log_y_hat = log_log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+We did it. We found a log transformation that seems to give higher predictive power than the vanilla linear model on the raw response and raw feature.
+
+This brings up the whole idea of "model selection". We went hunting for models until we found one that's better. We will do model selection as the next big topic!
+
+Transforming y is a big decision as it changes the response metric! The rule of thumb is it is easier to model a response metric that has less extreme values (especially when using linear models) as the extreme values have a big impact on slope coefficients and can distort the best fit line due to the least squares minimization (hence the popularity of logging the response).
+
+Let's see if we get anywhere with this using all the features in this model.
+
+```{r}
+lm_y = lm(price ~ ., diamonds)
+lm_ln_y = lm(log(price) ~ ., diamonds)
+summary(lm_y)$r.squared
+summary(lm_y)$sigma
+
+#now for the log-linea model
+y_hat = exp(lm_ln_y$fitted.values)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+``` 
+
+This is pretty convincing evidence that this transformation does a better job (at least in our linear modeling context).
+
+Let's look at one prediction:
+
+```{r}
+predict(lm_y, diamonds[12345, ])
+exp(predict(lm_ln_y, diamonds[12345, ]))
+diamonds$price[12345]
+```
+
+Again, we should be careful when you use $g$ after logging, you will have to exponentiate the result (middle line above). 
+
+Small point: this exponentiation is known to create bias because $E[Y]$ is different from $exp(E[ln(y)])$ (for those who took 368 - remember Jensen's inequality?) For the purposes of this class, this can be ignored since we are evaluating g on its own merits and we're doing so honestly.
+
+If you like this stuff, there are a whole bunch of transformations out there that are even cooler than the natural log. 
+
+# Linear Models with Feature Interactions
+
+Let's go back to modeling price with weight. Let us add a third variable to this plot, color, a metric about the "yellowness" of the diamond. This is an ordinal categorical variable ranging from D (most clear i.e. best) to J (most yellow in this dataset i.e. worst).
+
+
+```{r}
+pacman::p_load(ggplot2)
+base = ggplot(diamonds, aes(x = carat, y = price)) 
+base +
+  geom_point(aes(col = color)) + 
+  scale_color_brewer(type = "div")
+```
+
+We can split the data on color to see it more clearly:
+
+```{r}
+base +
+  geom_point() +
+  facet_wrap(~ color, ncol = 3) + 
+  aes(color = color) + scale_color_brewer(type = "div")
+```
+
+
+What do we see here? It looks like the slope of the price vs. carat linear model is slightly affected by color. For instance, the "D" color diamonds' price increases much faster as weight increases than the "E" color diamonds' price increases in weight, etc. Why do you think this is?
+
+We can picture two of these linear models below by fitting two submodels, one for D and one for J:
+
+```{r}
+mod_D = lm(price ~ carat, diamonds[diamonds$color == "D", ])
+b_D = coef(mod_D)
+mod_J = lm(price ~ carat, diamonds[diamonds$color == "J", ])
+b_J = coef(mod_J)
+b_D
+b_J
+```
+
+Let's see it on the plot:
+
+```{r}
+base +
+  geom_point(aes(col = color)) + scale_color_brewer(type = "div") +
+  geom_abline(intercept = b_D[1], slope = b_D[2], col = "blue", lwd = 2) +
+  geom_abline(intercept = b_J[1], slope = b_J[2], col = "red", lwd = 2)
+```
+
+This indicates a separate intercept and carat-slope for each color. How is this done? Interacting carat and slope. The formula notation has the `*` operator for this. It is a type of abstract multiplication after all!
+
+```{r}
+mod = lm(price ~ color, diamonds)
+coef(mod)
+mod = lm(price ~ carat * color, diamonds)
+coef(mod)
+```
+
+The reference category is color D. This means every other color should start lower and have a lower slope. This is approximately what we see above.
+
+How much of a better model is this than a straight linear model?
+
+```{r}
+mod_vanilla = lm(price ~ carat + color, diamonds)
+summary(mod_vanilla)$r.squared
+summary(mod_vanilla)$sigma
+summary(mod_vanilla)$df[1]
+summary(mod)$r.squared
+summary(mod)$sigma
+summary(mod)$df[1]
+```
+
+You can get more predictive accuracy out of this. We added degrees of freedom? 
+
+Is this gain real? Yes. With six more df's and $n = 54,000$ there is no chance this gain came from overfitting noise. Add 10,000 garbage features, that's a different story.
+
+Let's take a look at carat with another variable, depth, a continuous predictor. High depth indicates diamonds are skinny and tall; low depth indicates diamonds are flat like a pancake.
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(col = depth), lwd = 1, alpha = 0.5) + scale_colour_gradientn(colours = rainbow(5))
+```
+
+It seems people like flatter diamonds and are willing to pay more per carat. Let's see this in the regression:
+
+```{r}
+mod = lm(price ~ carat + depth, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat * depth, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Also a real performance boost.
+
+How about cut?
+
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(col = cut), lwd = 0.5) + scale_color_brewer(type = "div")
+```
+
+Looks like ideal diamonds increase more steeply with size vs lower cut diamonds. Let's see this in action:
+
+```{r}
+mod = lm(price ~ carat, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat * cut, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Yes.
+
+Can we include all these interactions?
+
+```{r}
+mod = lm(price ~ carat + color + depth + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat * (color + depth + cut), diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+coef(mod)
+```
+
+A decent gain for all three.
+
+What does the design matrix look like there? What is $p$?
+
+```{r}
+Xmm = model.matrix(price ~ carat * (color + depth + cut), diamonds)
+head(Xmm)
+```
+
+
+Can we take a look at interactions of two categorical variables?
+
+
+```{r}
+plot1 = ggplot(diamonds, aes(x = cut, y = color)) +
+  geom_jitter(aes(col = price), lwd = 0.5) + scale_colour_gradientn(colours = rainbow(5))
+plot1
+```
+
+Cool animation possible. May not work because it needs a ton of packages...
+
+```{r}
+pacman:::p_load_gh("dgrtwo/gganimate")
+plot1 + transition_time(price)
+```
+
+Not so clear what's going on here. Let's see what the regressions say:
+
+
+```{r}
+mod = lm(price ~ color + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ color * cut, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Not too much gain. Likely not real (overfitting)!
+
+
+
+
+## Model Selection and Three Data Splits
+
+This unit is split into three use cases (1) Selection among M explicit models (2) Hyperparameter Selection within one algorithm (3) Stepwise Model Construction
+
+# Use Case (I) Selecting one of M Explicit Models
+
+We have now covered non-linearities (e.g. polynomial terms) and interactions. A new complication now clearly emerges. If I have $p$ predictors, there are many linear least squares models I can build (considering non-linear least squares models makes the space of models even larger!!)
+
+For instance, here are a bunch of models and their in-sample performance:
+
+```{r}
+pacman::p_load(ggplot2)
+all_model_formulas = list( #note: need these as strings for later...
+  "price ~ carat + depth",
+  "price ~ carat + depth + color + x + y + z",
+  "price ~ .",
+  "price ~ . * ."
+)
+mods = lapply(all_model_formulas, lm, diamonds)
+lapply(mods, function(mod){summary(mod)$sigma})
+```
+
+Obviously the in-sample RMSE's are increasing due to the complexity, but which model is "best"?
+
+This is one of the most fundamental problems in statistics, and possibly all of science! 
+
+In class, we discussed validation via dividing $\mathbb{D}$ into (a) a training set and a (b) testing set. Now, we will further divide the training set into (a) a sub-training set and a (b) selection set and we still have the (c) test set. 
+
+The total training set together will fit a model and testing will estimate future performance. But within the total training set, we'll use an elaborate algorithim: we'll fit many models and take the best one. That's the "master algorithm".
+
+We'll make the selection set and the test set the same size but we don't have to. First split up the data:
+
+```{r}
+n = nrow(diamonds)
+K = 5
+set.seed(1984)
+test_indices = sample(1 : n, size = n * 1 / K)
+master_train_indices = setdiff(1 : n, test_indices)
+select_indices = sample(master_train_indices, size = n * 1 / K)
+train_indices = setdiff(master_train_indices, select_indices)
+rm(master_train_indices)
+
+#make sure we did this right:
+pacman::p_load(testthat)
+expect_equal(1 : n, sort(c(train_indices, select_indices, test_indices)))
+
+diamonds_train = diamonds[train_indices, ]
+diamonds_select = diamonds[select_indices, ]
+diamonds_test = diamonds[test_indices, ]
+
+rm(test_indices, select_indices, train_indices)
+```
+
+Now, fit all models and select the best one:
+
+```{r}
+mods = lapply(all_model_formulas, lm, diamonds_train)
+```
+
+Now predict on the selection set and look at the oos $s_e$, and select the "best" model
+
+```{r}
+yhat_selects = lapply(mods, function(mod){predict(mod, diamonds_select)})
+y_select = diamonds_select$price #the true prices
+
+s_e_s = lapply(yhat_selects, function(yhat_select){sd(yhat_select - y_select)})
+s_e_s
+#find the minimum
+which.min(s_e_s)
+```
+
+Which are overfit? Which are underfit? Were these models "poor choices"?
+
+Can we go back and fit some more models? 
+
+Yes - as long as we don't open the "lockbox" of the test set. Let's look at one more model. An expansion of the best of the previous 4 models now with a couple interactions we are convinced are real plus a couple of non-linear terms:
+
+```{r}
+all_model_formulas[[5]] = "price ~ . + carat * color + carat * depth + I(carat^2) + I(depth^2)"
+mods[[5]] = lm(all_model_formulas[[5]], diamonds_train) 
+
+yhat_selects[[5]] = predict(mods[[5]], diamonds_select)
+
+s_e_s[[5]] = sd(yhat_selects[[5]] - y_select)
+s_e_s
+#find the minimum
+which.min(s_e_s)
+```
+
+We can go further and fit more and more models but we should always be careful that we don't fit too many as we may optimize to the selection set. Here, we are lucky since the selection set is large (~11,000 observations) so this is not too much of a fear.
+
+But you can see the problem - how can we build a good model??
+
+The answer to this is non-parametric regression / machine learning. But first, we will cover two other important topics before we get there.
+
+Let us return and complete the exercise by now declaring we are done modeling and we are going to ship model 5. Let us get a conservative estimate of its performance:
+
+```{r}
+mod5_for_test = lm(all_model_formulas[[5]], rbind(diamonds_train, diamonds_select))
+yhat_test_mod5 = predict(mod5_for_test, diamonds_test)
+y_test = diamonds_test$price #the true prices
+sd(yhat_test_mod5 - y_test)
+```
+
+About the same as the selection estimate --- we did not overfit too much to the selection set.
+
+At this point the lockbox is open and we can never return (if we are honest, of course - many people in this business are not but it's never worth it).
+
+Now we can build production model 4 with all data to ship:
+
+```{r}
+mod_final = lm(all_model_formulas[[5]], diamonds)
+```
+
+No evaluation is done on the final model. It is only used to predict future diamonds' prices.
+
+We can make two improvements using CV to the above model selection procedure:
+
+* To reduce variance in the selection process, you make a CV of the selection set. 
+* To reduce variance in the testing process, you make an outer CV of the test set so that the first CV is a nested resampling. 
+
+This is a lot more coding! But we're in luck because it's done for us already. I will eventually demo the `mlr3` package which makes this easy because it's too difficult to code from scratch without bugs.
+
+
+# Use Case (II) Hyperparameter Selection
+
+Remember the `lambda` from the Vapnik Objective Function which we minimized to compute an SVM for non-linearly separable data? We now have a way to automatically select its value. Each lambda value implies a different model. Hence we need to do "model selection" to select a hyperparameter which selects our model with the best performance.
+
+Let's demo this on the `adult` dataset. Due to computational concerns only, let's limit the dataset to be size n = 3000 with 1/3-1/3-1/3 training-select-test sets.
+
+```{r}
+pacman::p_load_gh("coatless/ucidata") #load from github
+data(adult)
+adult = na.omit(adult)
+n = 3000
+adult = adult[sample(1 : nrow(adult), n), ]
+adult_train =  adult[1 : (n / 3), ]
+adult_select = adult[(n / 3 + 1) : (2 * n / 3), ]
+adult_test =   adult[(2 * n / 3 + 1) : n, ]
+```
+
+We now load the SVM package. Recall how to use the SVM: you specify a "cost" argument. That cost is related to the lambda value.
+
+```{r}
+pacman::p_load(e1071)
+#e.g. 
+#svm(income ~ ., adult_train, kernel = "linear", cost = 0.1)
+```
+
+So now we need to pick a bunch of cost values to search over. This is called a "grid search". It's still a decision! How many values in the grid? Step size? Minimum? Maximum? 
+
+Let's search over 50 models. And we can specify cost values on the log10 scale. Let minimum be 1e-6 and maximum be 100. 
+
+```{r}
+M = 50
+cost_grid = 10^seq(from = -6, to = 2, length.out = M)
+cost_grid
+```
+
+Let's do our search and collect errors on the select set:
+
+```{r}
+select_set_misclassification_errors_by_m = array(NA, M)
+for (m in 1 : M){
+  #train on train set
+  svm_mod = svm(income ~ ., adult_train, kernel = "linear", cost = cost_grid[m])
+  #predict on select set
+  y_hat = predict(svm_mod, adult_select)
+  #measure error from the select set
+  select_set_misclassification_errors_by_m[m] = mean(adult_select$income != y_hat)
+}
+```
+
+Let's plot these oos misclassification error rates:
+
+```{r}
+ggplot(data.frame(cost = cost_grid, miscl_err = select_set_misclassification_errors_by_m)) + 
+  aes(x = cost, y = miscl_err) +
+  geom_line(color = "grey") + 
+  geom_point(lwd = 3) + 
+  scale_x_log10()
+```
+
+Looks like the grid gave us a natural minimum. We can find the best value of the cost hyperparameter and its associated misclassification error:
+
+```{r}
+min(select_set_misclassification_errors_by_m)
+optimal_cost_hyperparam = cost_grid[which.min(select_set_misclassification_errors_by_m)]
+optimal_cost_hyperparam
+```
+
+Assume we will use this model and not test any more values of cost, we can get an honest performance metric for this optimally-tuned hyperparameter svm for the future on the test set:
+
+```{r}
+svm_mod = svm(income ~ ., adult_train, kernel = "linear", cost = optimal_cost_hyperparam)
+y_hat = predict(svm_mod, adult_test)
+mean(adult_test$income != y_hat)
+```
+
+This is about the same as we found on the select set. Thus, we didn't overfit the select set too much.
+
+To ship the final model, use all the data.
+
+```{r}
+g_final = svm(income ~ ., adult, kernel = "linear", cost = optimal_cost_hyperparam)
+```
+
+
+# Use Case (III) Forward Stepwise Model Construction
+
+There are many types of such stepwise models. Here we will look at Forward Stepwise Linear models. "Forward" meaning we start with a low complexity model and end with a high complexity model, "Stepwise" meaning we do so iteratively which each step consisting of one additional degree of freedom i.e. one incremental increase in complexity and "Linear" meaning that the model is linear. By default we use OLS.
+
+We will be using the diamonds data again as an example. Let's make sure we have unordered factors to avoid issues later:
+
+```{r}
+rm(list = ls())
+diamonds = ggplot2::diamonds
+diamonds$cut = factor(diamonds$cut, ordered = FALSE)
+diamonds$color = factor(diamonds$color, ordered = FALSE)
+diamonds$clarity = factor(diamonds$clarity, ordered = FALSE)
+```
+
+What we're doing will be highly computational, so let's take a random sample of the diamonds in $\mathbb{D}$ for training, selecting and testing:
+
+```{r}
+Nsamp = 1300
+set.seed(1984)
+subindices = sample(1 : nrow(diamonds), Nsamp * 3)
+diamonds_train = diamonds[subindices[1 : Nsamp], ]
+diamonds_select = diamonds[subindices[(Nsamp + 1) : (2 * Nsamp)], ]
+diamonds_test = diamonds[subindices[(2 * Nsamp + 1) : (3 * Nsamp)], ]
+rm(subindices)
+```
+
+Let's built a model with all second-order interactions e.g. all things that look like depth x table x clarity or depth^2 x color or depth^3.
+
+```{r}
+mod = lm(price ~ . * . * ., diamonds_train)
+```
+
+How many variables is this? And what does it look like?
+
+```{r}
+length(coef(mod))
+```
+
+Here's what some of the feature names look like:
+
+```{r}
+sample(names(coef(mod)), 100)
+```
+
+For features that are non-binary, the total will be p_non_binary^3 features. Binary features are more complicated because its each level in feature A times each level in feature B. There are no squared or cube terms for binary features (since they're all the same i.e. ${0,1}^d = {0,1}$).
+
+Remember we likely overfit just using first order interactions? We'll certainly overfit using first-order interactions AND second order interactions.
+
+```{r}
+summary(mod)$r.squared
+sd(summary(mod)$residuals)
+```
+
+Is that believable? Well... let's try predicting using this insano model on another Nsamp we didn't see...
+
+```{r}
+y_hat_test = predict(mod, diamonds_test)
+y_test = diamonds_test$price
+e_test = y_test - y_hat_test
+1 - sum((e_test)^2) / sum((y_test - mean(y_test))^2)
+sd(e_test)
+```
+
+VERY negative oos $R^2$ and awful RMSE --- why? We overfit big time!
+
+```{r}
+sd(y_test)
+sd(e_test) / sd(y_test)
+```
+
+This is not only "overfitting"; it is an absolute trainwreck! This means you can do ~60x better using the null model (average of y) instead of this model.
+
+So let us employ stepwise to get a "good" model. We need our basis predictors to start with. How about the linear components of `. * . * .` --- there's nothing intrinsically wrong with that - it's probably a good basis for $f(x)$. Let's create the model matrix for both train and test:
+
+```{r}
+Xmm_train = model.matrix(price ~ . * . * ., diamonds_train)
+y_train = diamonds_train$price
+p_plus_one = ncol(Xmm_train)
+Xmm_select = model.matrix(price ~ . * . * ., diamonds_select)
+y_select = diamonds_select$price
+```
+
+Now let's go through one by one and add the best one based on $s_e$ gain i.e. the best new dimension to add to project the most of the vector $y$ as possible onto the column space.
+
+```{r}
+included_features_by_iter = c() #keep a growing list of predictors by iteration
+in_sample_ses_by_iteration = c() #keep a growing list of se's by iteration
+oos_ses_by_iteration = c() #keep a growing list of se's by iteration
+i = 1
+
+repeat {
+
+  #get all predictors left to try
+  all_ses = array(NA, p_plus_one) #record all possibilities
+  for (j_try in 1 : p_plus_one){
+    if (j_try %in% included_features_by_iter){
+      next 
+    }
+    Xmm_sub = Xmm_train[, c(included_features_by_iter, j_try), drop = FALSE]
+    all_ses[j_try] = sd(lm.fit(Xmm_sub, y_train)$residuals) #lm.fit so much faster than lm! 
+  }
+  j_star = which.min(all_ses)
+  included_features_by_iter = c(included_features_by_iter, j_star)
+  in_sample_ses_by_iteration = c(in_sample_ses_by_iteration, all_ses[j_star])
+  
+  #now let's look at oos
+  Xmm_sub = Xmm_train[, included_features_by_iter, drop = FALSE]
+  mod = lm.fit(Xmm_sub, y_train)
+  y_hat_select = Xmm_select[, included_features_by_iter, drop = FALSE] %*% mod$coefficients
+  oos_se = sd(y_select - y_hat_select)
+  oos_ses_by_iteration = c(oos_ses_by_iteration, oos_se)
+  
+  cat("i =", i, "in sample: se = ", round(all_ses[j_star], 1), "oos_se", round(oos_se, 1), "added:", colnames(Xmm_train)[j_star], "\n")
+  
+  i = i + 1
+  
+  if (i > Nsamp || i > p_plus_one){
+    break #why??
+  }
+}
+```
+
+Now let's look at our complexity curve:
+
+```{r}
+simulation_results = data.frame(
+  iteration = 1 : length(in_sample_ses_by_iteration),
+  in_sample_ses_by_iteration = in_sample_ses_by_iteration,
+  oos_ses_by_iteration = oos_ses_by_iteration
+)
+
+pacman::p_load(latex2exp)
+ggplot(simulation_results) + 
+  geom_line(aes(x = iteration, y = in_sample_ses_by_iteration), col = "red") +
+  geom_line(aes(x = iteration, y = oos_ses_by_iteration), col = "blue") + 
+  ylim(0, max(c(simulation_results$in_sample_ses_by_iteration, simulation_results$oos_ses_by_iteration)))
+  ylab(TeX("$s_e$"))
+```
+
+
+We can kind of see what the optimal model is above. There is a whole zone of flat models. Better to be simple. So let's pick it from the graph visually. You can also obviously do CV within each iterations to stabilize this further.
+
+What's the optimal number of features? And its associated oos s_e?
+
+```{r}
+p_opt = 40 #change this based on plot above
+oos_ses_by_iteration[p_opt]
+```
+
+What are those features?
+
+```{r}
+sort(colnames(Xmm_train)[included_features_by_iter[1 : p_opt]])
+```
+
+Lots of carat-color-clarity interactions which makes sense. Other features don't matter so much as their information is probably duplicated within carat, color and clarity.
+
+What is the "true optimal model"? It's impossible to find as we'd have to search all subsets (of which there are exponential number of them 2^1000 = 10^31). Here we used a greedy search so hopefully we get somewhere in the ballpark of optimal. 
+
+We now get a conservative estimate of its future performance:
+
+```{r}
+Xmm_test = model.matrix(price ~ . * . * ., diamonds_test)
+optimal_mod = lm(diamonds_test$price ~ 0 + Xmm_test[, included_features_by_iter[1 : p_opt]])
+summary(optimal_mod)$sigma
+```
+
+Looks even better than we found during the stepwise iterations on the select set. This is random variation. It would be better to use CV within the stepwise and CV outside to then stabilize this final estimate.
+
+The final step is to fit g_final on all data using those selected features.
+
+
+
+
 ## Piping
 
 Take a look at this one-liner:
