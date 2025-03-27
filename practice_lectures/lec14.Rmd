@@ -227,7 +227,7 @@ b_1 = mod$coefficients[2]
 ggplot(Galton, aes(x = parent, y = child)) + 
   geom_point() + 
   geom_jitter() +
-  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", linewidth = 1) +
   xlim(63.5, 72.5) + 
   ylim(63.5, 72.5) +
   coord_equal(ratio = 1)
@@ -239,7 +239,7 @@ Let's say I want to predict child's height for parents' average height of 70in. 
 predict(mod, data.frame(parent = 70))
 ```
 
-What if I want to predict for a parents' height of 5in. Is there any 12in tall human being? No... it is absurd. But nothing stops you from doing:
+What if I want to predict for a parents' height of 5in. Is there any 27in tall human being? No... it is absurd. But nothing stops you from doing:
 
 ```{r}
 predict(mod, data.frame(parent = 5))
@@ -287,10 +287,10 @@ plot_function_degree_13 = function(x, b){
   b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
 }
 
-# xymin = 65
-# xymax = 71
-xymin = 50
-xymax = 90
+xymin = 65
+xymax = 71
+# xymin = 50
+# xymax = 90
 ggplot(Galton, aes(x = parent, y = child)) + 
   geom_point() + 
   geom_jitter() +
