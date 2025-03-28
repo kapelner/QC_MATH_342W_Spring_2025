@@ -4,6 +4,134 @@ author: "Your Name Here"
 output: pdf_document
 ---
 
+Let's load up the diamonds dataset and compute ln_price (not raw price) and consider it as the prediction target. 
+
+```{r}
+pacman::p_load(ggplot2) #this loads the diamonds data set too
+diamonds = ggplot2::diamonds
+?diamonds
+diamonds$cut =      factor(diamonds$cut, ordered = FALSE)      #convert to nominal
+diamonds$color =    factor(diamonds$color, ordered = FALSE)    #convert to nominal
+diamonds$clarity =  factor(diamonds$clarity, ordered = FALSE)  #convert to nominal
+diamonds$ln_carat = log(diamonds$carat)
+diamonds$ln_price = log(diamonds$price)
+```
+
+Create model (A) of ln_price ~ ln_carat.
+
+```{r}
+#Model A
+mod_a = lm(ln_price ~ ln_carat, diamonds)
+```
+
+Create a model (B) of ln_price on ln_carat interacted with clarity and compare its performance with the model (A).
+
+```{r}
+#Model B
+#TO-DO
+```
+
+Which model does better? Why?
+
+#TO-DO
+
+Create a model of (C) ln_price on ln_carat interacted with every categorical feature (clarity, cut and color) and compare its performance with model (B)
+
+```{r}
+#Model C
+#TO-DO
+```
+
+Which model does better? Why?
+
+#TO-DO
+
+Create a model (D) of ln_price on every continuous feature (logs of carat, x, y, z, depth, table) interacted with every categorical feature (clarity, cut and color) and compare its performance with model (C).
+
+```{r}
+#Model D
+#TO-DO
+```
+
+Which model does better? Why?
+
+#TO-DO
+
+What is the p of this model D? Compute with code.
+
+```{r}
+#TO-DO
+```
+
+Create model (E) which is the same as before except create include the raw features interacted with the categorical features and gauge the performance against (D).
+
+```{r}
+#Model E
+#TO-DO
+```
+
+Which model does better? Why?
+
+#TO-DO
+
+Create model (F) which is the same as before except also include also third degree polynomials of the continuous features interacted with the categorical features and gauge performance against (E). By this time you're getting good with R's formula syntax!
+
+```{r}
+#Model F
+#TO-DO
+```
+
+Which model does better? Why?
+
+#TO-DO
+
+Can you think of any other way to expand the candidate set curlyH? Discuss.
+
+#TO-DO
+
+We should probably assess oos performance now. Sample 2,000 diamonds and use these to create a training set of 1,800 random diamonds and a test set of 200 random diamonds. Define K and do this splitting:
+
+```{r}
+#TO-DO
+```
+
+Compute in and out of sample performance for models A-F. Use s_e as the metric (standard error of the residuals). Create a list with keys A, B, ..., F to store these metrics. Remember the performances here will be worse than before since before you're using nearly 52,000 diamonds to build a model and now it's only 1,800! 
+
+```{r}
+#TO-DO
+```
+
+You computed oos metrics only on n_* = 200 diamonds. What problem(s) do you expect in these oos metrics?
+
+#TO-DO
+
+To do the K-fold cross validation we need to get the splits right and crossing is hard. We've developed code for this already in a previous lab.
+
+```{r}
+temp = rnorm(n)
+folds_vec = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+rm(temp)
+head(folds_vec, 200)
+```
+
+Do the K-fold cross validation for model F and compute the overall s_e and s_s_e. 
+
+```{r}
+#TO-DO
+```
+
+Does K-fold CV help reduce variance in the oos s_e? Discuss.
+
+#TO-DO
+
+Imagine using the entire rest of the dataset besides the 2,000 training observations divvied up into slices of 200. Measure the oos error for each slice on Model F in a vector `s_e_s_F` and compute the `s_s_e_F` and also plot it.
+
+```{r}
+#TO-DO
+ggplot(data.frame(s_e_s_F = s_e_s_F)) + geom_histogram(aes(x = s_e_s_F))
+```
+
+
 #Model Selection with Three Splits: Select from M models
 
 We employ the diamonds dataset and specify M models nested from simple to more complex. We store the models as strings in a list (i.e. a hashset)
