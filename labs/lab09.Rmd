@@ -4,7 +4,165 @@ author: "Your Name Here"
 output: pdf_document
 ---
 
-#YARF
+
+#Rcpp and optimizing R
+
+Write a function `dot_product_R` in R that takes in two vectors `v1` and `v2` and returns their dot product.
+
+```{r}
+#TO-DO
+```
+
+Write a function `dot_product_cpp` in C++ and make sure it compiles.
+
+```{r}
+cppFunction('
+  double dot_product_cpp(NumericVector v1, NumericVector v2) {
+    #TO-DO
+  }
+')
+```
+
+Create two vectors of standard normal realizations with length `n=1e6` and test the different in speed.
+
+```{r}
+n = 1e6
+v1 = rnorm(n)
+v2 = rnorm(n)
+
+pacman::p_load(microbenchmark)
+microbenchmark(
+  dot_product_R(v1, v2), 
+  dot_product_cpp(v1, v2),
+  times = 10
+)
+```
+
+Implement the Gram Schmidt routine as a C++ function `gram_schmidt_cpp`.
+
+```{r}
+#TO-DO
+```
+
+Here is the implementation in R for reference taken from lab 5:
+
+```{r}
+gram_schmidt_R = function(X){
+  #first create orthogonal matrix
+  V = matrix(NA, nrow = nrow(X), ncol = ncol(X))
+  V[, 1] = X[, 1]
+  
+  for (j in 2 : ncol(X)){
+    V[, j] = X[, j]
+    
+    for (k in 1 : (j-1)){
+      v_k = V[, k, drop = FALSE]
+      V[, j] = V[, j, drop = FALSE] - (t(t(v_k)) %*% t(v_k) / sum(v_k^2)) %*% t(t(X[, j])) #i.e. the orthogonal projection of X[, j] onto v_k
+    }
+  }
+  
+  Q = matrix(NA, nrow = nrow(X), ncol = ncol(X))
+  for (j in 1 : ncol(X)){
+    Q[, j] = V[, j] / sqrt(sum(V[, j]^2))
+  }
+  Q
+}
+```
+
+Now let's see how much faster C++ is by running it on the boston housing data design matrix
+```{r}
+X = model.matrix(medv ~ ., MASS::Boston)
+
+microbenchmark(
+  gram_schmidt_R(X),
+  gram_schmidt_cpp(X),
+  times = 10
+)
+```
+
+Create a variable `n` to be 10 and a vaiable `Nvec` to be 100 initially. Create a random vector via `rnorm` `Nvec` times and load it into a `Nvec` x `n` dimensional matrix.
+
+```{r}
+#TO-DO
+```
+
+Write a function `all_angles` that measures the angle between each of the pairs of vectors. You should measure the vector on a scale of 0 to 180 degrees with negative angles coerced to be positive.
+
+```{r}
+#TO-DO
+```
+
+Plot the density of these angles.
+
+```{r}
+#TO-DO
+```
+
+Write an Rcpp function `all_angles_cpp` that does the same thing. Use an IDE if you want, but write it below in-line.
+
+```{r}
+#TO-DO
+```
+
+Test the time difference between these functions for `n = 1000` and `Nvec = 100, 500, 1000, 5000` using the package `microbenchmark`.  Store the results in a matrix with rows representing `Nvec` and two columns for base R and Rcpp.
+
+```{r}
+Nvecs = c(100, 500, 1000, 5000)
+
+results_for_time = data.frame(
+  Nvec = Nvecs,
+  time_for_base_R = numeric(),
+  time_for_cpp = numeric()
+)
+for (i in 1 : length(Nvecs)){
+  X = matrix(rnorm(n * Nvecs[i]), nrow = Nvec)
+  results_for_time$time_for_base_R[i] = all_angles(X)
+  results_for_time$time_for_cpp[i] = all_angles_cpp(X)
+}
+
+ggplot(results_for_time) + 
+  geom_line(aes(x = Nvec, y = time_for_base_R), col = "red") +
+  geom_line(aes(x = Nvec, y = time_for_cpp), col = "blue")
+```
+
+Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot. We wil see later how to create "long" matrices that make such plots easier.
+
+```{r}
+#TO-DO
+```
+
+Let `Nvec = 10000` and vary `n` to be 10, 100, 1000. Plot the density of angles for all three values of `n` on one plot using color to signify `n`. Make sure you have a color legend. This is not easy.
+
+```{r}
+#TO-DO
+```
+
+Write an R function `nth_fibonnaci` that finds the nth Fibonnaci number via recursion but allows you to specify the starting number. For instance, if the sequence started at 1, you get the familiar 1, 1, 2, 3, 5, etc. But if it started at 0.01, you would get 0.01, 0.01, 0.02, 0.03, 0.05, etc.
+
+```{r}
+#TO-DO
+```
+
+Write an Rcpp function `nth_fibonnaci_cpp` that does the same thing. Use an IDE if you want, but write it below in-line.
+
+```{r}
+#TO-DO
+```
+
+Time the difference in these functions for n = 100, 200, ...., 1500 while starting the sequence at the smallest possible floating point value in R. Store the results in a matrix.
+
+```{r}
+#TO-DO
+```
+
+Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot.
+
+```{r}
+#TO-DO
+```
+
+
+#YARF setup
 
 For the next couple of labs, I want you to make some use of a package I wrote that offers convenient and flexible tree-building and random forest-building. Make sure you have a JDK installed first
 
@@ -32,49 +190,6 @@ pacman::p_load(YARF)
 
 Please try to fix the error messages (if they exist) as best as you can. I can help on slack.
 
-#Data Munging: a realistic exercise
-
-This lab exercise may be the most important lab of the semester in terms of real-world experience and "putting it all together". We will be constructing a data frame which will then get passed on to the model-building. So this emulates the pre-steps necessary to get to the point where we assume we're at in this class.
-
-We will be joining three datasets in an effort to make a design matrix that predicts if a bill will be paid on time. Clean up and load up the three files. Then I'll rename a few features and then we can examine the data frames.
-
-Make sure you set the directory of RStudio to the directory where this file lives and make sure you download the bills_dataset folder from github (you can do this via `git pull` and then copying that directory over).
-
-```{r}
-#setwd(...)
-rm(list = ls())
-pacman::p_load(tidyverse, magrittr, data.table, R.utils)
-bills = fread("bills_dataset/bills.csv.bz2")
-payments = fread("bills_dataset/payments.csv.bz2")
-discounts = fread("bills_dataset/discounts.csv.bz2")
-setnames(bills, "amount", "tot_amount")
-setnames(payments, "amount", "paid_amount")
-skimr::skim(bills)
-skimr::skim(payments)
-skimr::skim(discounts)
-```
-
-The unit we care about is the bill. The y metric we care about will be "paid in full" which is 1 if the company paid their total amount (we will generate this y metric later).
-
-Since this is the response, we would like to construct the very best design matrix in order to predict y.
-
-First, join the three datasets in an intelligent way. You will need to examine the datasets beforehand.
-
-```{r}
-#TO-DO
-```
-
-Now create the binary response metric `paid_in_full` as the last column and create the beginnings of a design matrix `bills_data`. Ensure the unit / observation is bill i.e. each row should be ONE bill ONLY! 
-
-```{r}
-#TO-DO
-```
-
-How should you add features from transformations (called "featurization")? What data type(s) should they be? Make some features below if you think of any useful ones. Name the columns appropriately so another data scientist can easily understand what information is in your variables. Make sure missingness (if in a categorical variable) is treated as a legal level of that variable. Make sure the response variable is there too in the final data frame.
-
-```{r}
-#TO-DO
-```
 
 
 # Regression Trees
