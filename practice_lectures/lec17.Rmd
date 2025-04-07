@@ -128,7 +128,7 @@ We can make two improvements using CV to the above model selection procedure:
 This is a lot more coding! But we're in luck because it's done for us already. I will eventually demo the `mlr3` package which makes this easy because it's too difficult to code from scratch without bugs.
 
 
-# Use Case (II) Hyperparameter Selection
+# Use Case (III) Hyperparameter Selection
 
 Remember the `lambda` from the Vapnik Objective Function which we minimized to compute an SVM for non-linearly separable data? We now have a way to automatically select its value. Each lambda value implies a different model. Hence we need to do "model selection" to select a hyperparameter which selects our model with the best performance.
 
@@ -216,6 +216,8 @@ g_final = svm(income ~ ., adult, kernel = "linear", cost = optimal_cost_hyperpar
 ```
 
 We do not test the final model; we only use it to predict in the future.
+
+
 
 ## Piping
 
@@ -1474,4 +1476,5 @@ ggplot(py$flights) +
 
 lm(ARR_DELAY ~ AIRLINE, py$flights)
 ```
+
 

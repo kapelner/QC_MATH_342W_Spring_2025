@@ -3,772 +3,432 @@ title: "Practice Lecture 18 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 ---
 
-## The K tradeoff
 
-K determines how large the training set is relative to the test set when you're doing honest validation for an algorithm. For now, let's not use K-fold CV, but only examine one split at a time. Consider this simulated dataset with 50 observations:
+# Using Probability Estimation to do Classification
+
+First repeat quickly (a) load the adult data (b) do a training / test split and (c) build the logisitc model.
 
 ```{r}
-n = 50
-xmin = 0
-xmax = 4
-sigma_e_ignorance = 0.8
-# set.seed(1)
-set.seed(1984)
-x = runif(n, xmin, xmax)
-y = 2 + 3 * x^2 + rnorm(n, 0, sigma_e_ignorance) #f(x)  + delta
+rm(list = ls())
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+adult = na.omit(adult) #kill any observations with missingness
 
+set.seed(1)
+train_size = 5000
+train_indices = sample(1 : nrow(adult), train_size)
+adult_train = adult[train_indices, ]
+y_train = adult_train$income
+X_train = adult_train
+X_train$income = NULL
+
+test_size = 5000
+test_indices = sample(setdiff(1 : nrow(adult), train_indices), test_size)
+adult_test = adult[test_indices, ]
+y_test = adult_test$income
+X_test = adult_test
+X_test$income = NULL
+
+logistic_mod = glm(income ~ ., adult_train, family = "binomial")
+p_hats_train = predict(logistic_mod, adult_train, type = "response")
+p_hats_test = predict(logistic_mod, adult_test, type = "response")
+```
+
+Let's establish a rule: if the probability estimate is greater than or equal to 50%, let's classify the observation as positive, otherwise 0.
+
+```{r}
+y_hats_train = factor(ifelse(p_hats_train >= 0.5, ">50K", "<=50K"))
+```
+
+How did this "classifier" do in-sample?
+
+```{r}
+mean(y_hats_train != y_train)
+in_sample_conf_table = table(y_train, y_hats_train)
+in_sample_conf_table
+```
+
+And the performance stats:
+
+```{r}
+n = sum(in_sample_conf_table)
+fp = in_sample_conf_table[1, 2]
+fn = in_sample_conf_table[2, 1]
+tp = in_sample_conf_table[2, 2]
+tn = in_sample_conf_table[1, 1]
+num_pred_pos = sum(in_sample_conf_table[, 2])
+num_pred_neg = sum(in_sample_conf_table[, 1])
+num_pos = sum(in_sample_conf_table[2, ])
+num_neg = sum(in_sample_conf_table[1, ])
+precision = tp / num_pred_pos
+cat("precision", round(precision * 100, 2), "%\n")
+recall = tp / num_pos
+cat("recall", round(recall * 100, 2), "%\n")
+false_discovery_rate = 1 - precision
+cat("false_discovery_rate", round(false_discovery_rate * 100, 2), "%\n")
+false_omission_rate = fn / num_pred_neg
+cat("false_omission_rate", round(false_omission_rate * 100, 2), "%\n")
+```
+
+That was in-sample which may be overfit. Howe about oos?
+
+```{r}
+y_hats_test = factor(ifelse(p_hats_test >= 0.5, ">50K", "<=50K"))
+mean(y_hats_test != y_test)
+oos_conf_table = table(y_test, y_hats_test)
+oos_conf_table
+```
+
+A tad bit worse. Here are estimates of the future performance for each class:
+
+```{r}
+n = sum(oos_conf_table)
+fp = oos_conf_table[1, 2]
+fn = oos_conf_table[2, 1]
+tp = oos_conf_table[2, 2]
+tn = oos_conf_table[1, 1]
+num_pred_pos = sum(oos_conf_table[, 2])
+num_pred_neg = sum(oos_conf_table[, 1])
+num_pos = sum(oos_conf_table[2, ])
+num_neg = sum(oos_conf_table[1, ])
+precision = tp / num_pred_pos
+cat("precision", round(precision * 100, 2), "%\n")
+recall = tp / num_pos
+cat("recall", round(recall * 100, 2), "%\n")
+false_discovery_rate = 1 - precision
+cat("false_discovery_rate", round(false_discovery_rate * 100, 2), "%\n")
+false_omission_rate = fn / num_pred_neg
+cat("false_omission_rate", round(false_omission_rate * 100, 2), "%\n")
+```
+
+Worse than in-sample (which was expected). But still could be "good enough" depending on your definition of "good enough".
+
+However... this whole classifier hinged on the decision of the prob-threshold = 50%! What if we change this default threshold??
+
+# Asymmetric Cost Classifiers
+
+Let's establish a *new* rule: if the probability estimate is greater than or equal to 90%, let's classify the observation as positive, otherwise 0.
+
+```{r}
+y_hats_test = factor(ifelse(p_hats_test >= 0.9, ">50K", "<=50K"))
+mean(y_hats_test != y_test)
+oos_conf_table = table(y_test, y_hats_test)
+oos_conf_table
+```
+
+Of course the misclassification error went up! But now look at the confusion table! The second column represents all $\hat{y} = 1$ and there's not too many of them! Why? You've made it *much* harder to classify something as positive. Here's the new additional performance metrics now:
+
+```{r}
+n = sum(oos_conf_table)
+fp = oos_conf_table[1, 2]
+fn = oos_conf_table[2, 1]
+tp = oos_conf_table[2, 2]
+tn = oos_conf_table[1, 1]
+num_pred_pos = sum(oos_conf_table[, 2])
+num_pred_neg = sum(oos_conf_table[, 1])
+num_pos = sum(oos_conf_table[2, ])
+num_neg = sum(oos_conf_table[1, ])
+precision = tp / num_pred_pos
+cat("precision", round(precision * 100, 2), "%\n")
+recall = tp / num_pos
+cat("recall", round(recall * 100, 2), "%\n")
+false_discovery_rate = 1 - precision
+cat("false_discovery_rate", round(false_discovery_rate * 100, 2), "%\n")
+false_omission_rate = fn / num_pred_neg
+cat("false_omission_rate", round(false_omission_rate * 100, 2), "%\n")
+```
+
+We don't make many false discoveries but we make a lot of false omissions! It's a tradeoff...
+
+
+# Receiver-Operator Curve Plot
+
+The entire classifier is indexed by that indicator function probability threshold which creates the classification decision. Why not see look at the entire range of possible classification models. We do this with a function. We will go through it slowly and explain each piece:
+
+```{r}
+#' Computes performance metrics for a binary probabilistic classifer
+#'
+#' Each row of the result will represent one of the many models and its elements record the performance of that model so we can (1) pick a "best" model at the end and (2) overall understand the performance of the probability estimates a la the Brier scores, etc.
+#'
+#' @param p_hats  The probability estimates for n predictions
+#' @param y_true  The true observed responses
+#' @param res     The resolution to use for the grid of threshold values (defaults to 1e-3)
+#'
+#' @return        The matrix of all performance results
+compute_metrics_prob_classifier = function(p_hats, y_true, res = 0.001){
+  #we first make the grid of all prob thresholds
+  p_thresholds = seq(0 + res, 1 - res, by = res) #values of 0 or 1 are trivial
+  
+  #now we create a matrix which will house all of our results
+  performance_metrics = matrix(NA, nrow = length(p_thresholds), ncol = 12)
+  colnames(performance_metrics) = c(
+    "p_th",
+    "TN",
+    "FP",
+    "FN",
+    "TP",
+    "miscl_err",
+    "precision",
+    "recall",
+    "FDR",
+    "FPR",
+    "FOR",
+    "miss_rate"
+  )
+  
+  #now we iterate through each p_th and calculate all metrics about the classifier and save
+  n = length(y_true)
+  for (i in 1 : length(p_thresholds)){
+    p_th = p_thresholds[i]
+    y_hats = factor(ifelse(p_hats >= p_th, ">50K", "<=50K"))
+    confusion_table = table(
+      factor(y_true, levels = c("<=50K", ">50K")),
+      factor(y_hats, levels = c("<=50K", ">50K"))
+    )
+      
+    fp = confusion_table[1, 2]
+    fn = confusion_table[2, 1]
+    tp = confusion_table[2, 2]
+    tn = confusion_table[1, 1]
+    npp = sum(confusion_table[, 2])
+    npn = sum(confusion_table[, 1])
+    np = sum(confusion_table[2, ])
+    nn = sum(confusion_table[1, ])
+  
+    performance_metrics[i, ] = c(
+      p_th,
+      tn,
+      fp,
+      fn,
+      tp,
+      (fp + fn) / n,
+      tp / npp, #precision
+      tp / np,  #recall
+      fp / npp, #false discovery rate (FDR)
+      fp / nn,  #false positive rate (FPR)
+      fn / npn, #false omission rate (FOR)
+      fn / np   #miss rate
+    )
+  }
+  
+  #finally return the matrix
+  performance_metrics
+}
+```
+
+Now let's generate performance results for the in-sample data:
+
+```{r}
+pacman::p_load(data.table, magrittr)
+performance_metrics_in_sample = compute_metrics_prob_classifier(p_hats_train, y_train) %>% data.table
+performance_metrics_in_sample
+```
+
+Now let's plot the ROC curve
+
+```{r}
 pacman::p_load(ggplot2)
-data_plot = ggplot(data.frame(x = x, y = y)) + 
-  aes(x = x, y = y) + 
-  geom_point()
-data_plot
+ggplot(performance_metrics_in_sample) +
+  geom_line(aes(x = FPR, y = recall)) +
+  geom_abline(intercept = 0, slope = 1, col = "orange") + 
+  coord_fixed() + xlim(0, 1) + ylim(0, 1)
 ```
 
-Note how $f(x)$ is quadratic and there is random noise which is "ignorance error". The random noise will be part of generalization error and can never go away.
-
-If we use OLS with no derived features, then we can at most get $h*(x)$. Let's see what $h^*(x) = \beta_0 + \beta_1 x$ truly is. To do this, we imagine we see an absolute ton of data and run OLS on it.
+Now calculate the area under the curve (AUC) which is used to evaluate the probabilistic classifier (just like the Brier score) using a trapezoid area function. 
 
 ```{r}
-n_hidden = 1e6
-x_hidden = seq(from = xmin, to = xmax, length.out = n_hidden)
-y_hidden = 2 + 3 * x_hidden^2 + rnorm(n_hidden, 0, sigma_e_ignorance)
-h_star_mod = lm(y_hidden ~ x_hidden)
-coef(h_star_mod)
+pacman::p_load(pracma)
+-trapz(performance_metrics_in_sample$FPR, performance_metrics_in_sample$recall)
 ```
 
-The fact that $\beta = [-6~12]^\top$ can actually be solved with calculus: $\int_0^4 ((2 + 3x^2) - (b_0 + b_1 x))^2 dx$ and solve for $b0$ and $b1$ explicitly by minimizing.
+This is not bad at all!
 
-Plotting that over $\mathbb{D}$ we obtain
+Note that I should add $<0, 0>$ and $<1, 1>$ as points before this is done but I didn't...
+
+How do we do out of sample?
+
 
 ```{r}
-data_plot +
-  geom_abline(intercept = coef(h_star_mod)[1], slope = coef(h_star_mod)[2], color = "green")
+performance_metrics_oos = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+performance_metrics_oos
 ```
 
-That is the best we're going to get. However, $g_{final}$ falls far short of it due to estimation error since n is only 50:
+And graph the ROC:
+
 
 ```{r}
-g_final_mod = lm(y ~ x)
-coef(g_final_mod)
-data_plot +
-  geom_abline(intercept = coef(h_star_mod)[1], slope = coef(h_star_mod)[2], color = "green") +
-  geom_abline(intercept = coef(g_final_mod)[1], slope = coef(g_final_mod)[2], color = "red")
+#first we do our own melting of two data frames together to make it long format
+performance_metrics_in_and_oos = rbind(
+    cbind(performance_metrics_in_sample, data.table(sample = "in")),
+    cbind(performance_metrics_oos, data.table(sample = "out"))
+)
+ggplot(performance_metrics_in_and_oos) +
+  geom_line(aes(x = FPR, y = recall, col = sample)) +
+  geom_abline(intercept = 0, slope = 1, col = "orange") + 
+  coord_fixed() + xlim(0, 1) + ylim(0, 1)
 ```
 
 
+```{r}
+-trapz(performance_metrics_oos$FPR, performance_metrics_oos$recall)
+```
 
-The model $g$ can vary quite a bit as we subsample $\mathbb{D}$ which is what happens when you do train-test splits. It varies a lot because there is large misspecification error. If the model was correctly specified, the results of everything that follows will be less impressive. 
+Not bad at all - only a tad worse! In the real world it's usually a lot worse. We are lucky we have n = 5,000 in both a train and test set.
 
-But in the real world - is your model ever correctly specified? is $f \in \mathcal{H}$?? NO. So this is more realistic.
-
-Now let's let K be small. Let K = 2 meaning even 50-50 split of test and train.
+# Detection Error Tradeoff curve
 
 ```{r}
-K = 2
-prop_train = (K - 1) / K
-n_train = round(prop_train * n)
+table(y_test) / length(y_test)
+table(y_train) / length(y_train)
+ggplot(performance_metrics_in_and_oos) +
+  geom_line(aes(x = FDR, y = miss_rate, col = sample)) +
+  coord_fixed() + xlim(0, 1) + ylim(0, 1)
+```
+
+What is the interpretation of this plot?
+
+#Using AUC to Compare Probabilistic Classification Models
+
+What would the effect be of less information on the same traing set size? Imagine we didn't know the features: occupation, education, education_num, relationship, marital_status. How would we do relative to the above? Worse!
+
+```{r}
+pacman::p_load(data.table, tidyverse, magrittr)
+if (!pacman::p_isinstalled(ucidata)){
+  pacman::p_load_gh("coatless/ucidata")
+} else {
+  pacman::p_load(ucidata)
+}
+
+data(adult)
+adult = na.omit(adult) #kill any observations with missingness
+
 set.seed(1)
-index_train = sample(1 : n, n_train, replace = FALSE)
-index_test = setdiff(1 : n, index_train)
+train_size = 5000
+train_indices = sample(1 : nrow(adult), train_size)
+adult_train = adult[train_indices, ]
+y_train = adult_train$income
+X_train = adult_train
+X_train$income = NULL
 
-x_train = x[index_train]
-y_train = y[index_train]
-x_test = x[index_test]
-y_test = y[index_test]
+test_size = 5000
+test_indices = sample(setdiff(1 : nrow(adult), train_indices), test_size)
+adult_test = adult[test_indices, ]
+y_test = adult_test$income
+X_test = adult_test
+X_test$income = NULL
 
-mod = lm(y_train ~ ., data.frame(x = x_train))
-y_hat_test = predict(mod, data.frame(x = x_test))
-g_s_e_K_2 = sqrt(mean((y_test - y_hat_test)^2)) #RMSE
-g_s_e_K_2
+logistic_mod_full = glm(income ~ ., adult_train, family = "binomial")
+p_hats_test = predict(logistic_mod_full, adult_test, type = "response")
+
+performance_metrics_oos_full_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+
+logistic_mod_red = glm(income ~ . - occupation - education - education_num - relationship - marital_status, adult_train, family = "binomial")
+p_hats_test = predict(logistic_mod_red, adult_test, type = "response")
+
+performance_metrics_oos_reduced_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+
+
+ggplot(rbind(
+  performance_metrics_oos_full_mod[, model := "full"],
+  performance_metrics_oos_reduced_mod[, model := "reduced"]
+)) +
+  geom_point(aes(x = FPR, y = recall, shape = model, col = p_th), size = 1) +
+  geom_abline(intercept = 0, slope = 1) + 
+  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
+  scale_colour_gradientn(colours = rainbow(5))
 ```
 
-That's the estimate of generalization error. It should be biased downwards i.e. the real error is less. 
-
-How about if K is large? Let's say $K = n / 2$ meaning n_train = 48 and n_test = 2.
+and we can see clearly that the AUC is worse. This means that the full model dominates the reduced model for every FPR / TPR pair.
 
 ```{r}
-K = n / 2
-prop_train = (K - 1) / K
-n_train = round(prop_train * n)
-set.seed(1)
-index_train = sample(1 : n, n_train, replace = FALSE)
-index_test = setdiff(1 : n, index_train)
-
-x_train = x[index_train]
-y_train = y[index_train]
-x_test = x[index_test]
-y_test = y[index_test]
-
-mod = lm(y_train ~ ., data.frame(x = x_train))
-y_hat_test = predict(mod, data.frame(x = x_test))
-g_s_e_K_n_over_2 = sqrt(mean((y_test - y_hat_test)^2)) #RMSE
-g_s_e_K_2
-g_s_e_K_n_over_2
+pacman::p_load(pracma)
+-trapz(performance_metrics_oos_reduced_mod$FPR, performance_metrics_oos_reduced_mod$recall)
+-trapz(performance_metrics_oos_full_mod$FPR, performance_metrics_oos_full_mod$recall)
 ```
 
-I set the seed for illustration purposes. More data to train on = less error which is why this estimate at K=25 is lower than when K=2.
+As we lose information that is related to the true causal inputs, we lose predictive ability. Same story for this entire data science class since error due to ignorance increases! And certainly no different in probabilistic classifiers.
 
-In reality, there is massive variance over specific splits! Let's run the simulation many times.
-
-While we're at it, let's do all possible K's! Well, what are all the valid K's? If you want to keep the sizes the same, any factorization of n except the trivial 1 since n = 1 * n. A K = 1 would mean there's no split!!! How to find divisors? Of course a package for this.
+Here's the same story with the DET curve:
 
 ```{r}
-pacman::p_load(numbers)
-setdiff(divisors(n), 1)
+ggplot(rbind(
+  performance_metrics_oos_full_mod[, model := "full"],
+  performance_metrics_oos_reduced_mod[, model := "reduced"]
+)) +
+  geom_point(aes(x = FDR, y = miss_rate, shape = model, col = p_th), size = 1) +
+  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
+  scale_colour_gradientn(colours = rainbow(5))
 ```
 
-But should we also include the trivial n? Yes K = n is indeed a valid divisor. And this type of CV is called the "leave one out cross validation" (LOOCV). Now we compute the errors over K:
 
-This simulation takes a long time. So I pre-saved its results.
+# Choosing a Decision Threshold Based on Asymmetric Costs and Rewards
+
+The ROC and DET curves gave you a glimpse into all the possible classification models derived from a probability estimation model. Each point on that curve is a separate $g(x)$ with its own performance metrics. How do you pick one?
+
+Let's create rewards and costs. Imagine we are trying to predict income because we want to sell people an expensive item e.g. a car. We want to advertise our cars via a nice packet in the mail. The packet costs \$5. If we send a packet to someone who really does make $>50K$/yr then we are expected to make \$1000. So we have rewards and costs below:
 
 ```{r}
-Nsim_per_K = 2000
-Kuniqs = setdiff(divisors(n), 1)
-num_Kuniqs = length(Kuniqs)
-Ks = rep(Kuniqs, Nsim_per_K)
-results = data.frame(s_e = rep(NA, Nsim_per_K * num_Kuniqs), K = rep(NA, Nsim_per_K * num_Kuniqs))
-for (nsim in 1 : length(Ks)){
-  K = Ks[nsim]
-  prop_train = (K - 1) / K
-  n_train = round(prop_train * n)
-  index_train = sample(1 : n, n_train, replace = FALSE)
-  index_test = setdiff(1 : n, index_train)
-  
-  x_train = x[index_train]
-  y_train = y[index_train]
-  x_test = x[index_test]
-  y_test = y[index_test]
-  
-  mod = lm(y_train ~ ., data.frame(x = x_train))
-  y_hat_test = predict(mod, data.frame(x = x_test))
-  results[nsim, ] = c(
-    sqrt(mean((y_test - y_hat_test)^2)), #RMSE
-    K
-  )
-}
+r_tp = 0
+c_fp = -5
+c_fn = -1000
+r_tn = 0
 ```
 
-Let's take the average error over each simulated split and also its variability:
+Let's return to the linear logistic model with all features. Let's calculate the overall oos average reward per observation (per person) for each possible $p_{th}$:
 
 ```{r}
-pacman::p_load(dplyr)
-results_summary = results %>%
-  group_by(K) %>%
-  summarize(avg_s_e = mean(s_e), s_s_e = sd(s_e), sim_err = sd(s_e) / sqrt(Nsim_per_K)) %>%
-  mutate(ci_a = avg_s_e - 2 * s_s_e / sqrt(K)) %>%
-  mutate(ci_b = avg_s_e + 2 * s_s_e / sqrt(K))
-results_summary
+n = nrow(adult_test)
+performance_metrics_oos_full_mod$avg_cost = 
+  (r_tp * performance_metrics_oos_full_mod$TP +
+  c_fp * performance_metrics_oos_full_mod$FP +
+  c_fn * performance_metrics_oos_full_mod$FN +
+  r_tn * performance_metrics_oos_full_mod$TN) / n
 ```
 
-
-
-
-
-Now let's see what the distributions look like to visualize the means and variances.
+Let's plot average reward (reward per person) by threshold:
 
 ```{r}
-sim_plot = ggplot(results) + 
-  aes(x = s_e) +
-  geom_density(aes(fill = factor(K)), alpha = 0.3) + 
-  xlim(0, NA) + 
-  geom_vline(data = results_summary, aes(xintercept = avg_s_e, color = factor(K)))
-sim_plot
+ggplot(performance_metrics_oos_full_mod) +
+  geom_line(aes(x = p_th, y = avg_cost)) #+
+  # xlim(0, 0.05) + ylim(-5,0)
 ```
 
-
-
-The main takeaways are
-
-(1) the std err of generalization error estimate is much lower for low K than high K
-
-With high K, the test set is small meaning the estimate has high variance; with low K, the test set is large meaning you can measure it with low variance.
-
-(2) the average of generalization error estimate is lower for high K than low K
-
-With high K, the training set is large meaning $g$ is closer to g_final and thus has higher expected accuracy; with low K, the training set is small meaning $g$ is further from g_final and thus has lower expected accuracy.
-
-Thus, the tradeoff is bias vs. variance. There are many similar tradeoffs in statistics. We will see one later when we do machine learning.
-
-Is the estimates' accuracy for what we really care about? 
-
-The actual error of g_final can be estimated by imagining tons of future observations:
+Obviously, the best decision is $p_{th} \approx 0$ which means you classifiy almost everything as a positive. This makes sense because the mailing is so cheap. What are the performance characteristics of the optimal model?
 
 ```{r}
-y_hat_g_final = predict(g_final_mod, data.frame(x = x_hidden))
-gen_error_true = sqrt(mean((y_hidden - y_hat_g_final)^2))
-gen_error_true
+i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
+performance_metrics_oos_full_mod[i_star, ]
+
+# performance_metrics_oos_full_mod[, .(p_th, avg_cost)]
 ```
 
-The generalization error of g_final is pictured below:
+The more interesting problem is where the cost of advertising is higher:
 
 ```{r}
-sim_plot + 
-  geom_vline(xintercept = gen_error_true, col = "black", size = 2)
+r_tp = 0
+c_fp = -200
+c_fn = -1000
+r_tn = 0
+performance_metrics_oos_full_mod$avg_cost = 
+  (r_tp * performance_metrics_oos_full_mod$TP +
+  c_fp * performance_metrics_oos_full_mod$FP +
+  c_fn * performance_metrics_oos_full_mod$FN +
+  r_tn * performance_metrics_oos_full_mod$TN) / n
+ggplot(performance_metrics_oos_full_mod) +
+  geom_point(aes(x = p_th, y = avg_cost), lwd = 0.01)
 ```
 
-Remember, g_final's error should be lower than both averages since it uses all the data. But we see above it's higher!
-
-So what happened? Simple... we are mixing apples and oranges. We calculated the real generalization error by looking at one million future observations. We calculated the colored distributions by looking at our data only which is a random realization of many such datasets! Thus, our generalization errors are biased based on the specific n observations in D we received. We will see that K-fold helps a bit with this. But there is nothing we can do about it beyond that (besides collect more observations). If you get a weird sample, you get a weird sample! Note that the CI's which were [s_e +/- 2 * s_s_e / sqrt(K)] contained the real value (except LOOCV).
-
-How would we be able to generate the picture we really want to see? We would run this simulation over many datasets and average. That would be a giant simulation. To show that this is the case, go back and change the seed in the first chunk and rerun. You'll see a different white bar.
-
-What is the main takeaway? K matters because it induces a tradeoff. It shouldn't be too large or too small. And, generalization error estimation is very variable in low n. To see this, go back and increase n.
-
-
-Let's do the demo again. This time, we generate all samples from the data generating process.
+What are the performance characteristics of the optimal model?
 
 ```{r}
-rm(list = ls())
-pacman::p_load(numbers, testthat, ggplot2)
-
-n = 50
-xmin = 0
-xmax = 4
-sigma_e_ignorance = 0.8
-set.seed(1984)
-Ntest = 1e6
-Kuniqs = setdiff(divisors(n), 1)
-
-Nsim = 5e6
+i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
+performance_metrics_oos_full_mod[i_star, ]
 ```
 
-The simulation below take a long time. So I saved it.
+If $g_{pr}$ is closer to $f_{pr}$, what happens? 
 
-```{r}
-results = data.frame(s_e = numeric(), K = character())
+All the threshold-derived classification models get better and you are guaranteed to make more money since you have a better discriminating eye.
 
-for (nsim in 1 : Nsim){
-  x = runif(n, xmin, xmax)
-  y = 2 + 3 * x^2 + rnorm(n, 0, sigma_e_ignorance) #f(x)  + delta
-  
-  #do all the oos validation
-  for (i in 1 : length(Kuniqs)){
-    K = Kuniqs[i]
-    prop_train = (K - 1) / K
-    n_train = round(prop_train * n)
-    index_train = sample(1 : n, n_train, replace = FALSE)
-    index_test = setdiff(1 : n, index_train)
-    expect_equal(sort(c(index_test, index_train)), 1:n)
-    
-    x_train = x[index_train]
-    y_train = y[index_train]
-    Xytrain = data.frame(x = x_train, y = y_train)
-    x_test = x[index_test]
-    y_test = y[index_test]
-    
-    g_mod = lm(y ~ ., Xytrain)
-    y_hat_g = predict(g_mod, data.frame(x = x_test))
-    g_s_e = sum(abs(y_test - y_hat_g)) / length(y_test)
-    results = rbind(results, data.frame(s_e = g_s_e, K = K))
-  }
-  
-  #now estimate generalization error on g_final
-  g_final_mod = lm(y ~ x)
-  x_star = seq(from = xmin, to = xmax, length.out = Ntest)
-  y_star = 2 + 3 * x_star^2 + rnorm(Ntest, 0, sigma_e_ignorance)
-  y_hat_g_final_star = predict(g_final_mod, data.frame(x = x_star))
-  gen_error_true = sum(abs(y_star - y_hat_g_final_star)) / Ntest
-  results = rbind(results, data.frame(s_e = gen_error_true, K = "true"))
-  save(results, file = "K_dgp_results.RData")
-}
-```
 
-Let's take the average error over each simulated split and also its variability:
 
-```{r}
-load("K_dgp_results.RData")
-pacman::p_load(dplyr)
-results_summary = results %>%
-  group_by(K) %>%
-  summarize(avg_s_e = mean(s_e), s_s_e = sd(s_e), sim_err = sd(s_e) / sqrt(Nsim)) %>%
-  arrange(as.numeric(K))
-results_summary
-```
 
-
-Now let's see what the distributions look like to visualize the means and variances.
-
-```{r}
-s_e_true = results %>% filter(K == "true") %>% pull(s_e) %>% mean
-sim_plot = ggplot(results %>% filter(K != "true")) + 
-  aes(x = s_e) +
-  geom_density(aes(fill = K), alpha = 0.3) + 
-  xlim(0, NA) + 
-  geom_vline(data = results_summary, aes(xintercept = avg_s_e, color = K), size = 1) + 
-  xlim(0, 8) + 
-  geom_vline(xintercept = s_e_true, color = "black")
-sim_plot
-```
-
-
-#K-fold CV variance reduction
-
-Let's run this same demo again except K-fold within the runs.
-
-This simulation takes a long time, so I saved it.
-
-
-```{r}
-rm(list = ls())
-pacman::p_load(numbers, testthat, ggplot2)
-
-n = 50
-xmin = 0
-xmax = 4
-sigma_e_ignorance = 0.8
-set.seed(1984)
-Ntest = 1e6
-Kuniqs = setdiff(divisors(n), 1)
-
-Nsim = 3e6
-
-#we will add to the previous experiment's results
-load("K_dgp_results.RData")
-
-
-for (nsim in 1 : Nsim){
-  x = runif(n, xmin, xmax)
-  y = 2 + 3 * x^2 + rnorm(n, 0, sigma_e_ignorance) #f(x)  + delta
-  
-  #do all the oos validation
-  for (i in 1 : length(Kuniqs)){
-    K = Kuniqs[i]
-    temp = rnorm(n)
-    k_fold_idx = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
-    
-    oos_residuals = array(NA, n)
-    for (k in 1 : K){
-      index_test = which(k_fold_idx == k)
-      index_train = setdiff(1 : n, index_test)
-      
-      x_train = x[index_train]
-      y_train = y[index_train]
-      Xytrain = data.frame(x = x_train, y = y_train)
-      x_test = x[index_test]
-      y_test = y[index_test]
-      
-      g_mod = lm(y ~ ., Xytrain)
-      y_hat_g = predict(g_mod, data.frame(x = x_test))
-      oos_residuals[index_test] = y_test - y_hat_g
-    }
-    g_k_fold_cv_s_e = sum(abs(oos_residuals)) / n
-    results = rbind(results, data.frame(s_e = g_k_fold_cv_s_e, K = paste0(K, "_cv")))
-  }
-  
-  #now estimate generalization error on g_final
-  g_final_mod = lm(y ~ x)
-  x_star = seq(from = xmin, to = xmax, length.out = Ntest)
-  y_star = 2 + 3 * x_star^2 + rnorm(Ntest, 0, sigma_e_ignorance)
-  y_hat_g_final_star = predict(g_final_mod, data.frame(x = x_star))
-  gen_error_true = sum(abs(y_star - y_hat_g_final_star)) / Ntest
-  results = rbind(results, data.frame(s_e = gen_error_true, K = "true"))
-}
-save(results, file = "K_dgp_results_K_fold.RData")
-```
-
-Let's take the average error over each simulated split and also its variability:
-
-```{r}
-load("K_dgp_results_K_fold.RData")
-pacman::p_load(dplyr)
-results_summary = results %>%
-  group_by(K) %>%
-  summarize(avg_s_e = mean(s_e), s_s_e = sd(s_e), s_avg_s_e = sd(s_e) / sqrt(Nsim)) %>%
-  arrange(as.numeric(K))
-results_summary[c(1:5, 8,10,6,7,9), ]
-```
-
-Exactly what's expected for average s_e. But the s_s_e's are much smaller than not doing CV! And stable!
-
-Now let's see what the distributions look like for the cross validations:
-
-```{r}
-pacman::p_load(tidyverse)
-sim_plot = ggplot(results %>% filter(str_detect(K, "_cv"))) + 
-  aes(x = s_e) +
-  geom_density(aes(fill = factor(K)), alpha = 0.3) + 
-  xlim(0, NA) + 
-  geom_vline(data = results_summary, aes(xintercept = avg_s_e, color = factor(K)), size = 1) + 
-  geom_vline(xintercept = s_e_true, color = "black") +
-  xlim(1.5, 5)
-sim_plot
-```
-
-With CV, you can use much higher K's seemingly without paying for it. Still the recommended value is usually 10.
-
-
-## Profiling with profvis
-
-Profiling code to see where it's slow and see where memory trouble may be is an important skill also in data science coding as the difference between "scripting" and "software engineer" is just a question of scale. The package for this is `profviz`:
-
-```{r}
-pacman::p_load(profvis)
-```
-
-Let's take a look at the K-fold code above inside the profiler. We do so by wrapping the code in a `profvis{...}` call:
-
-
-```{r}
-n = 50
-xmin = 0
-xmax = 4
-sigma_e_ignorance = 0.8
-# set.seed(1)
-set.seed(1984)
-x = runif(n, xmin, xmax)
-y = 2 + 3 * x^2 + rnorm(n, 0, sigma_e_ignorance) #f(x)  + delta
-
-Nsim_per_K = 1000
-Kuniqs = setdiff(divisors(n), 1)
-num_Kuniqs = length(Kuniqs)
-Ks = rep(Kuniqs, Nsim_per_K)
-results = data.frame(s_e = rep(NA, Nsim_per_K * num_Kuniqs), K = rep(NA, Nsim_per_K * num_Kuniqs))
-
-profvis({
-for (nsim in 1 : length(Ks)){
-  K = Ks[nsim]
-  prop_train = (K - 1) / K
-  n_train = round(prop_train * n)
-  index_train = sample(1 : n, n_train, replace = FALSE)
-  index_test = setdiff(1 : n, index_train)
-  
-  x_train = x[index_train]
-  y_train = y[index_train]
-  x_test = x[index_test]
-  y_test = y[index_test]
-  
-  mod = lm(y_train ~ ., data.frame(x = x_train))
-  y_hat_test = predict(mod, data.frame(x = x_test))
-  results[nsim, ] = c(
-    sqrt(mean((y_test - y_hat_test)^2)), #RMSE
-    K
-  )
-}
-})
-```
-We learned that calling `lm` and `predict` are killing us. There's probably overhead we don't need. Let's try to eliminate this:
-
-```{r}
-profvis({
-for (nsim in 1 : length(Ks)){
-  K = Ks[nsim]
-  prop_train = (K - 1) / K
-  n_train = round(prop_train * n)
-  index_train = sample(1 : n, n_train, replace = FALSE)
-  index_test = setdiff(1 : n, index_train)
-  
-  x_train = cbind(1, x[index_train])
-  y_train = y[index_train]
-  x_test = cbind(1, x[index_test])
-  y_test = y[index_test]
-  x_train_T = t(x_train)
-  b = solve(x_train_T %*% x_train) %*% x_train_T %*% y_train
-  y_hat_test = x_test %*% b
-  results[nsim, ] = c(
-    sqrt(mean((y_test - y_hat_test)^2)), #RMSE
-    K
-  )
-}
-})
-```
-Now we're being slowed at the assignment step and also at sampling. We can improve assignment by not using the concatenate and not using a dataframe. We can improve sampling with `sample.int`.
-
-```{r}
-results = matrix(NA, nrow = length(Ks), ncol = 2)
-colnames(results) = c("rmse", "K")
-
-profvis({
-for (nsim in 1 : length(Ks)){
-  K = Ks[nsim]
-  prop_train = (K - 1) / K
-  n_train = round(prop_train * n)
-  index_train = sample.int(n, n_train, replace = FALSE)
-  index_test = setdiff(1 : n, index_train)
-  
-  x_train = cbind(1, x[index_train])
-  y_train = y[index_train]
-  x_test = cbind(1, x[index_test])
-  y_test = y[index_test]
-  
-  x_train_T = t(x_train)
-  b = solve(x_train_T %*% x_train) %*% x_train_T %*% y_train
-  y_hat_test = x_test %*% b
-  results[nsim, 1] = sqrt(mean((y_test - y_hat_test)^2)) #RMSE
-  results[nsim, 2] = K
-}
-})
-```
-This is likely as lean as we can be. If we needed faster, we'd go to Rcpp. Here's speeding up `sample.int`:
-
-```{r}
-pacman::p_load(Rcpp)
-
-cppFunction("
-   std::vector<int> sample_int_rcpp(std::vector<int> x, int n)  {
-     std::vector<int> out;
-     std::sample(x.begin(), x.end(), std::back_inserter(out), n, std::mt19937{std::random_device{}()});
-     return out; 
-   }
-", plugins = "cpp17", includes = c("#include <random>", "#include <algorithm>", "#include <iterator>")
-)
-```
-
-```{r}
-results = matrix(NA, nrow = length(Ks), ncol = 2)
-colnames(results) = c("rmse", "K")
-one_to_n = 1: n
-
-profvis({
-for (nsim in 1 : length(Ks)){
-  K = Ks[nsim]
-  prop_train = (K - 1) / K
-  n_train = round(prop_train * n)
-  index_train = sample_int_rcpp(one_to_n, n_train)
-  index_test = setdiff(one_to_n, index_train)
-  
-  x_train = cbind(1, x[index_train])
-  y_train = y[index_train]
-  x_test = cbind(1, x[index_test])
-  y_test = y[index_test]
-  
-  x_train_T = t(x_train)
-  b = solve(x_train_T %*% x_train) %*% x_train_T %*% y_train
-  y_hat_test = x_test %*% b
-  results[nsim, 1] = sqrt(mean((y_test - y_hat_test)^2)) #RMSE
-  results[nsim, 2] = K
-}
-})
-```
-Unsure why this ran slower on my computer for `setdiff`.
-
-## mlr2/mlr3 package for K-fold CV and nested resampling
-
-"Machine Learning in R" (the `mlr3` package) is a very popular R library that makes it very simple to build models, do K-fold validation, etc.
-
-```{r}
-pacman::p_load(ggplot2, mlr3verse)
-```
-
-It splits the modeling task into conceptual pieces. The most basic pieces are:
-
-* Instantiate a "task". This consists of supplying a dataframe, identifying a variable that is the output and the type of predictions to be made.
-* Instantiate a "learner". This consists of $\mathcal{A}$ and $\mathcal{H}$. For example: OLS with all raw features.
-* Instantiate a type of validation. For example: 5-fold CV resampling.
-* Execute
-
-Here's what this process would look like for using OLS on the diamonds dataset:
-
-```{r}
-diamonds = ggplot2::diamonds
-#specify the modeling task: here it's regression on the diamonds dataset where the response is price
-modeling_task = TaskRegr$new(id = "diamonds", backend = diamonds, target = "price")
-#specify the algorithm and implicitly, the candidate set: here it's OLS
-algorithm = lrn("regr.lm") 
-#specify the type of validation: here we choose 5-fold CV
-validation = rsmp("cv", folds = 5)
-#then we execute the task:
-res = resample(modeling_task, algorithm, validation)
-```
-
-It's squabbling about something insignificant but at least it tells me exactly what I need to do to fix! Let's correct this error and do it again:
-
-```{r}
-diamonds$cut = factor(diamonds$cut, ordered = FALSE)
-diamonds$color = factor(diamonds$color, ordered = FALSE)
-diamonds$clarity = factor(diamonds$clarity, ordered = FALSE)
-#then recreate the modeling task with the updated dataset
-modeling_task = TaskRegr$new(id = "diamonds", backend = diamonds, target = "price")
-#then we execute the task again hopefully this time without error
-res = resample(modeling_task, algorithm, validation)
-```
-
-Note how it shows us the five folds were done.
-
-Now we want to assess our performance by looking at the rotated test set. To do so, 
-we need to provide an error metric of which there are lots:
-
-```{r}
-msrs()
-#see https://mlr3.mlr-org.com/reference/mlr_measures_regr.rmse.html
-#note how they define it without the p in the denominator... more confusion!
-```
-
-Let's choose RMSE. Here are the results:
-
-```{r}
-res$score(msr("regr.rmse"))$regr.rmse #looking at RMSE for each e-vector for each of the 5 folds
-res$aggregate(msr("regr.rmse")) #aggregating all e_i's together
-sd(res$score(msr("regr.rmse"))$regr.rmse) #computing s_s_e
-```
-
-### Using the MLR package for Model selection
-
-Can we use MLR for Linear Model Selection?
-
-Yes, but it is not as nice as I would've liked but it sure beats doing it yourself. I've figured it out by creating my own custom code. Warning: this is the old version of mlr (v2) as I couldn't figure it out in the new version of mlr... sorry...
-
-```{r}
-pacman::p_unload(mlr3verse)
-pacman::p_load(mlr)
-```
-
-First we define the formulas that index the models we are interested in examining. Here are a few from the lab:
-
-```{r}
-model_formulas = c(
-  "carat",
-  "carat + cut",
-  "carat + cut + color",
-  "carat + cut + color + clarity",
-  "carat + cut + color + clarity + x + y + z",
-  "carat + cut + color + clarity + x + y + z + depth",
-  "carat + cut + color + clarity + x + y + z + depth + table",
-  "carat * (cut + color + clarity) + x + y + z + depth + table",
-  "(carat + x + y + z) * (cut + color + clarity) + depth + table",
-  "(carat + x + y + z + depth + table) * (cut + color + clarity)",
-  "(poly(carat, 2) + x + y + z + depth + table) * (cut + color + clarity)"
-)
-model_formulas = paste0("price ~ ", model_formulas)
-```
-Then we create the task and learner
-
-```{r}
-modeling_task = makeRegrTask(data = diamonds, target = "price") #instantiate the task
-```
-
-Now we create a new learner which is a wrapper for the linear model with a custom formula. We need to specify learning parameters, a training function (build g) and a predict function. Then we need to add theese functions to the namespace in a way mlr understands.
-
-
-```{r}
-makeRLearner.regr.custom_ols = function() {
-  makeRLearnerRegr(
-    cl = "regr.custom_ols",
-    package = "base",
-    par.set = makeParamSet(
-      makeDiscreteLearnerParam(id = "formula", default = model_formulas[[1]], values = model_formulas)
-    ),
-    properties = c("numerics", "factors", "ordered"),
-    name = "Custom OLS with a Formula",
-    short.name = "custom_ols"
-  )
-}
-
-trainLearner.regr.custom_ols = function(.learner, .task, .subset, .weights = NULL, ...){
-  lm(list(...)$formula, data = getTaskData(.task, .subset))
-}
-
-predictLearner.regr.custom_ols = function (.learner, .model, .newdata, ...){
-    predict(.model$learner.model, newdata = .newdata, ...)
-}
-
-registerS3method("makeRLearner", "regr.custom_ols", makeRLearner.regr.custom_ols)
-registerS3method("trainLearner", "regr.custom_ols", trainLearner.regr.custom_ols)
-registerS3method("predictLearner", "regr.custom_ols", predictLearner.regr.custom_ols)
-```
-
-Now we create the "inner loop". Here, we cross validate over the different models. We do this by specifying a "tune wrapper" since technically each formula is considered a tuning paramter / hyperparameter the linear model on this task.
-
-```{r}
-Kinner = 3
-all_model_param_set = makeParamSet(
-  makeDiscreteParam(id = "formula", default = model_formulas[[1]], values = model_formulas)
-)
-inner_loop = makeResampleDesc("CV", iters = Kinner)
-lrn = makeTuneWrapper("regr.custom_ols", #instantiate the OLS learner algorithm
-        resampling = inner_loop, 
-        par.set = all_model_param_set, 
-        control = makeTuneControlGrid(), 
-        measures = list(rmse))
-```
-
-We now create the outer loop and execute:
-
-```{r}
-Kouter = 5
-outer_loop = makeResampleDesc("CV", iters = Kouter)
-r = resample(lrn, modeling_task, resampling = outer_loop, extract = getTuneResult, measures = list(rmse))
-```
-
-Now we look at the results a bunch of different ways:
-
-```{r}
-print(getNestedTuneResultsOptPathDf(r)) #results of each inner validation over all outer iterations
-r$extract #"winning" model for each outer iteration
-r #overall estimate of oos error of the whole procedure if it were used on all of $\mathbb{D}$
-```
-
-Is there a final winning model? No... we've tested how this meta-algorithm is going to perform in the real world. The meta algorithm is choose among those models using train-select sets and select the best model.
-
-## Use Case (III) Hyperparameter Selection
-
-Now we use `mlr3`, the latest version (sorry about before!)
-
-```{r}
-pacman::p_unload(mlr)
-pacman::p_load(mlr3verse)
-```
-
-We load the breast cancer dataset from earlier in the class.
-
-```{r}
-pacman::p_load(dplyr)
-cancer = MASS::biopsy %>%
-  select(-ID) %>% #drop the useless ID column
-  na.omit #drop all rows that are missing
-task = TaskClassif$new(id = "cancer", backend = cancer, target = "class")
-```
-
-We now create the learner. By default, SVM is not included, so we need to load an extension package. We ensure the SVM is linear like the one we studied in class (we don't have time to do nonlinear SVM's but it is basically an attempt to make the candidate space richer).
-
-```{r}
-pacman::p_load(mlr3learners, e1071)
-learner = lrn("classif.svm")
-learner$param_set$values = list(kernel = "linear")
-learner$param_set$values$type = "C-classification" #unsure why I need this...
-```
-
-Now we create the inner loop where we try many different values of the hyperparameter via a grid search. This grid search functionality has been further decomped in the new mlr3 package into a subpackage called `mlr3tuning`. 
-
-```{r}
-resampling = rsmp("holdout")
-search_space = ps(cost = p_dbl(lower = 0.0001, upper = 1))
-M = 30
-
-Kinner = 5
-terminator = trm("evals", n_evals = Kinner)
-tuner = tnr("grid_search", resolution = M)
-measure = msr("classif.ce") #misclassification error
-svm_hyperparameter_tuned = AutoTuner$new(tuner, learner, resampling, measure, terminator, search_space)
-```
-
-Now we create the outer loop and execute
-
-```{r}
-Kouter = 3
-resampling_outer = rsmp("cv", folds = Kouter)
-rr = resample(task = task, learner = svm_hyperparameter_tuned, resampling = resampling_outer)
-```
-
-Now we look at the results a bunch of different ways:
-
-```{r}
-rr$score()
-rr$aggregate()
-```
-
-That gives us the estimate of future performance. Now we create the model using just test-train split:
-
-
-```{r}
-svm_hyperparameter_tuned$train(task)
-svm_hyperparameter_tuned$tuning_result
-```
-This gives us the final hyperparameter value. Then the final model can be trained
-
-```{r}
-learner$param_set$values = c(learner$param_set$values, list(cost = at$tuning_result$cost))
-learner$train(task)
-g_final = learner$predict_newdata
-#this created g_final internally and you can predict on it for x-vec* via:
-g_final(cancer[1, ])
-```
