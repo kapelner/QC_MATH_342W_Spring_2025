@@ -984,131 +984,10 @@ microbenchmark(
 Looks like ``data.table::melt`` is 25-30x faster than tidyverse's pivot and ``data.tabe::dcast` is 2-3x faster than tidyverse's pivot.
 
 
-# Joins
-
-Another one of the core data munging skills is joining data frames together. In the real world, databases consist of multiple dataframes called "tables" and design matrices are built by gathering data from among many tables. To illustrate this, we load two datasets from the package `nycflights13`, one dataset about weather and one about airports:
-
-```{r}
-pacman::p_load(nycflights13, data.table, tidyverse, magrittr)
-data(weather)
-summary(weather)
-data(airports)
-summary(airports)
-
-head(weather)
-head(airports)
-```
-
-Note how the weather and airports datasets contain a common feature: name of airport. It is called `FAA` in airports and `origin` in weather.
-
-First we rename the column in weather to match the column in airports:
-
-```{r}
-weather %<>% 
-  rename(faa = origin)
-```
-
-We also pare down the datasets so we can see the joins more clearly:
-
-```{r}
-airports %<>% 
-  select(faa, lat, lon)
-weather %<>% 
-  select(faa, time_hour, temp, humid, wind_speed, pressure, wind_gust)
-head(airports)
-head(weather)
-airports_dt = data.table(airports)
-weather_dt = data.table(weather)
-```
-
-Some features just aren't measured that often e.g. `wind_gust`.
-
-Let's do some joins. First "left". This is likely the most common because it's usually how we conceptualize what we're doing in our heads. Tidyverse has it's own syntax and data.table uses the base R syntax directly. However, it offers a faster syntax (see benchmark below).
-
-```{r}
-airports_and_weather = left_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa", all.x = TRUE)
-airports_and_weather_dt = merge(airports_dt, weather_dt, all.x = TRUE) #note this works too since it knows faa is the only column in common but not recommended since specifying "by" is more clear
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-Now "right" join.
-
-```{r}
-airports_and_weather = right_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa", all.y = TRUE)
-airports_and_weather_dt = merge(airports_dt, weather_dt, all.y = TRUE)
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-
-```{r}
-airports_and_weather = inner_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa")
-airports_and_weather_dt = merge(airports_dt, weather_dt)
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-And full, keeping all the rows. We use a subset to show how this works:
-
-```{r}
-airports_without_EWR = airports %>%
-  filter(faa != "EWR")
-airports_without_EWR_dt = data.table(airports_without_EWR)
-airports_without_EWR_and_weather = full_join(airports_without_EWR, weather, by = "faa")
-airports_without_EWR_and_weather %>% sample_n(500)
-airports_without_EWR_and_weather_dt = merge(airports_without_EWR_dt, weather_dt, by = "faa", all = TRUE)
-airports_without_EWR_and_weather_dt = merge(airports_without_EWR_dt, weather_dt, all = TRUE)
-airports_without_EWR_and_weather_dt[sample(.N, 500)]
-```
-
-Who's faster?
-
-```{r}
-microbenchmark(
-  left_join_tidy = left_join(airports, weather, by = "faa"),
-  left_join_dt = merge(airports_dt, weather_dt, by = "faa", all.x = TRUE),
-  left_join_R = merge(data.frame(airports_dt), data.frame(weather_dt), by = "faa", all.x = TRUE),
-  full_join_tidy = inner_join(airports, weather, by = "faa"),
-  full_join_dt = merge(airports_dt, weather_dt, by = "faa"),  
-  full_join_R = merge(data.frame(airports_dt), data.frame(weather_dt), by = "faa"), 
-  times = 10
-)
-```
-
-This is one case where tidyverse is actually faster! Base R is as usual, terrible. 
-
-But if we key up the join columns and preorder the datasets...
-
-```{r}
-airports = airports %>% arrange(faa)
-weather = weather %>% arrange(faa)
-
-setorder(airports_dt, "faa")
-setorder(weather_dt, "faa")
-setkey(airports_dt, "faa")
-setkey(weather_dt, "faa")
-microbenchmark(
-  left_join_tidy = left_join(airports, weather, by = "faa"),
-  left_join_dt = merge(airports_dt, weather_dt, by = "faa", all.x = TRUE),
-  full_join_tidy = inner_join(airports, weather, by = "faa"),
-  full_join_dt = merge(airports_dt, weather_dt, by = "faa"),
-  times = 500
-)
-```
-
-Basically comparable now. But I did some more benchmarks with larger datasets and I think data.table usually wins (but not by much). 
-
-There is also `semi_join` and `anti_join` that do the opposite of joining. In my experience, these use cases are limited so we'll just not cover them in this class.
-
 
 # C++ and R
 
-R goes back to 1995 when it was adapted from S (written in 1976 by John Chambers at Bell Labs) with minor modifications. The core of base R is written in C and Fortran. These two languages are the fastest known languages (how to measure "fastest" is a huge debate). Thus, base R is very fast. For instance the `sort` function is as fast as C/Fortran since it immediately calls compiled C/Fortran routines.
+R goes back to 1995 when it was adapted from S (written in 1976 by John Chambers at Bell Labs) with minor modifications. The core of base R is written in C and Fortran. These two languages are the fastest known languages (how to measure "fastest" is a huge debate). Thus, many common functions in base R are very fast. For instance the `sort` function is as fast as C/Fortran since it immediately calls compiled C/Fortran routines.
 
 However, R code itself that you write is "interpreted" which means it is not compiled until you run it. And it has to compile on-the-fly, making it very slow. Prior to v3.4 (April, 2017) it was even slower since the code wasn't JIT compiled. All this "real CS" stuff you can learn in another class..
 
@@ -1432,6 +1311,8 @@ Here are the places where Rcpp is recommended to be used (from https://teuder.gi
 * Recurrent function calls within loops.
 * Changing the size of vectors dynamically.
 * Operations that need advanced data structures and algorithms (we don't do this in this class).
+
+If you want even faster you can parallelize with OpenMP within Rcpp a la https://mfasiolo.github.io/sc2-2019/rcpp_advanced_iii/1_openmp/.
 
 # Java and R
 
