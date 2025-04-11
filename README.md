@@ -16,7 +16,7 @@ My theory lectures are following my previous class notes (see [here](https://git
 * [Lab 11, due 5/11](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab11.Rmd) pushed to your github repo
 * [Lab 10, due 5/4](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab10.Rmd) pushed to your github repo
 * [Lab 9, due 4/27](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab09.Rmd) pushed to your github repo -->
-* [Lab 8, due 4/21](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab08.Rmd) pushed to your github repo
+* [Lab 8, due 4/22](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab08.Rmd) pushed to your github repo
 * [Lab 7, due 4/6](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab07.Rmd) pushed to your github repo
 * [Lab 6, due 3/30](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab06.Rmd) pushed to your github repo
 * [Lab 5, due 3/18](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab05.Rmd) pushed to your github repo

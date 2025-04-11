@@ -393,9 +393,3 @@ How should you add features from transformations (called "featurization")? What 
 ```{r}
 #TO-DO
 ```
-
-Now split the data using K=5, fit a linear model to the response that includes all first order interactions on the training and report oosRMSE on the test.
-
-```{r}
-#TO-DO
-```
