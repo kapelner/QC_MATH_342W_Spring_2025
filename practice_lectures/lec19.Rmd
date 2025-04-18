@@ -303,10 +303,11 @@ cppFunction('
 n = 500
 Xy = data.frame(int = rep(1, n), x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n), y = rnorm(n))
 X = as.matrix(Xy[, 1 : 4])
+Xt = t(X)
 y = as.matrix(Xy[, 5])
 
 #does the function work?
-expect_equal(as.numeric(ols_cpp(X, y)), as.numeric(solve(t(X) %*% X) %*% t(X) %*% y))
+expect_equal(as.numeric(ols_cpp(X, y)), as.numeric(solve(Xt %*% X) %*% Xt %*% y))
 ```
 
 Now how fast is it?
@@ -314,7 +315,8 @@ Now how fast is it?
 ```{r}
 microbenchmark(
   R_via_lm = lm(y ~ 0 + ., data = Xy),
-  R_matrix_multiplication = solve(t(X) %*% X) %*% t(X) %*% y,
+  R_via_lm_fit = lm.fit(X, y),
+  R_matrix_multiplication = solve(Xt %*% X) %*% Xt %*% y,
   cpp_with_armadillo = ols_cpp(X, y),
     times = 100
 )
@@ -569,7 +571,7 @@ ggplot(data.frame(nodesize = 1 : max_nodesize_to_try, in_sample_errors = in_samp
   geom_point(aes(nodesize, oos_errors), col = "blue")
 ```
 
-Looks like optimal nodesize is about 10.
+Looks like optimal nodesize is...
 
 ```{r}
 which.min(oos_errors)
@@ -586,11 +588,22 @@ ggplot(data.frame(inv_nodesize = (1 : max_nodesize_to_try)^-1, in_sample_errors 
 
 For some reason, we do not see serious overfitting even at nodesize = 1. Why? It's because the way trees predict - they always stay within [y_min, y_max]. There is no Runge phenomenon or line extensions so it really limits how bad your errors can be at the edges especially.
 
+Optimal tree
+
+```{r}
+tree_mod = YARFCART(data.frame(x = x), y, nodesize = which.min(oos_errors), calculate_oob_error = FALSE)
+yhat = predict(tree_mod, data.frame(x = x))
+ggplot(data.frame(x = x, y = y), aes(x, y)) + 
+  geom_point(lwd = 0.6) +
+  geom_point(aes(x, y), data.frame(x = x, y = yhat), col = "blue")
+```
+
 # Regression Trees with Real Data
 
 Now let's look at a regression tree model predicting medv in the Boston Housing data. We first load the data and do a training-test split:
 
 ```{r}
+rm(list = ls())
 set.seed(1984)
 pacman::p_load(MASS)
 data(Boston)
@@ -725,6 +738,55 @@ sd(e)
 It overfits but amazing it doesn't get clobbered completely! And its results are on-par with the non-overfit linear model probably because it made up for the overfitting by reducing misspecification error. 
 
 Trees are truly amazing!
+
+# Extrapolation with Trees
+
+```{r}
+rm(list = ls())
+pacman::p_load(HistData, ggplot2)
+data(Galton)
+
+tree_mod = YARFCART(data.frame(x = Galton$parent), Galton$child, calculate_oob_error = FALSE)
+
+mod = lm(child ~ parent, Galton)
+b_0 = mod$coefficients[1]
+b_1 = mod$coefficients[2]
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", linewidth = 1) +
+  xlim(63.5, 72.5) + 
+  ylim(63.5, 72.5) +
+  coord_equal(ratio = 1)
+
+degree_2_poly_mod = lm(child ~ poly(parent, 2, raw = TRUE), Galton)
+b_poly_2 = coef(degree_2_poly_mod)
+degree_13_poly_mod = lm(child ~ poly(parent, 13, raw = TRUE), Galton)
+b_poly_13 = coef(degree_13_poly_mod)
+b_poly_13[is.na(b_poly_13)] = 0
+
+plot_function_degree_2 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2
+}
+plot_function_degree_13 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
+}
+plot_YARFCART = function(x, tree_mod){
+  predict(tree_mod, data.frame(x = x))
+}
+
+xymin = 40
+xymax = 90
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue") +
+  coord_cartesian(xlim = c(xymin, xymax), ylim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_2, args = list(b = b_poly_2), col = "red", xlim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "orange", xlim = c(xymin, xymax)) +
+  stat_function(fun = plot_YARFCART, args = list(tree_mod = tree_mod), col = "purple", xlim = c(xymin, xymax))
+```
+
 
 
 # Classification Trees
