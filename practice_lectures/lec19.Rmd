@@ -866,7 +866,7 @@ y_hat_test = predict(tree_mod, X_test)
 mean(y_test != y_hat_test)
 ```
 
-What's the null model performance?
+Not bad! What's the null model performance?
 
 ```{r}
 mean(y_test != "benign") #the modal response is "benign"
@@ -882,6 +882,7 @@ rm(list = ls())
 pacman::p_load_gh("coatless/ucidata")
 data(adult)
 adult = na.omit(adult) #kill any observations with missingness
+adult$income = factor(adult$income)
 ?adult
 ```
 
