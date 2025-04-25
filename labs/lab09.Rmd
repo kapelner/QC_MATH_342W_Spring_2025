@@ -80,13 +80,13 @@ microbenchmark(
 )
 ```
 
-Create a variable `n` to be 10 and a vaiable `Nvec` to be 100 initially. Create a random vector via `rnorm` `Nvec` times and load it into a `Nvec` x `n` dimensional matrix.
+Create a variable `n` to be 10 and a variable `Nvec` to be 100 initially. Create a random vector via `rnorm` `Nvec` times and load it into a `Nvec` x `n` dimensional matrix.
 
 ```{r}
 #TO-DO
 ```
 
-Write a function `all_angles` that measures the angle between each of the pairs of vectors. You should measure the vector on a scale of 0 to 180 degrees with negative angles coerced to be positive.
+Write a function `all_angles` that measures the angle between each of the pairs of the `Nvec` vectors. You should measure the vector on a scale of 0 to 180 degrees with negative angles coerced to be positive.
 
 ```{r}
 #TO-DO
