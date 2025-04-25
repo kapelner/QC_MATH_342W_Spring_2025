@@ -24,7 +24,7 @@ x_trains = matrix(NA, nrow = Nsim, ncol = n_train)
 y_trains = matrix(NA, nrow = Nsim, ncol = n_train)
 all_oos_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
 for (nsim in 1 : Nsim){
-  #simulate dataset $\mathbb{D}$
+  #simulate dataset $D$
   x_train = runif(n_train, xmin, xmax)
   delta_train = rnorm(n_train, 0, sigma) #Assumption I: mean zero and Assumption II: homoskedastic
   y_train = f(x_train) + delta_train
@@ -70,7 +70,7 @@ ggplot(f_x_df, aes(x, f)) +
   geom_point(aes(x, y), data = data.frame(x = x_trains[3, ], y = y_trains[3, ]), col = "red")
 ```
 
-The blue dataset is one possible $\mathbb{D}$, the green dataset is another possible $\mathbb{D}$ and the red dataset is another possible $\mathbb{D}$. This illustrated "dataset-dataset variability".
+The blue dataset is one possible $D$, the green dataset is another possible $D$ and the red dataset is another possible $D$. This illustrated "dataset-dataset variability".
 
 Each of the datasets yields slightly different linear models:
 
@@ -85,17 +85,21 @@ ggplot(f_x_df, aes(x, f)) +
 
 
 
-Let's visualize the bias, the distance between the green line f(x) and the average model, E[g(x)]:
+Let's visualize the bias, the distance between the green line f(x) and the average model, E[G(x)]:
 
 ```{r}
 g_average = colMeans(training_gs)
 ggplot(f_x_df, aes(x, f)) + 
   geom_line(col = "green") + 
-  geom_abline(intercept = g_average[1], slope = g_average[2], color = "red") +
+  geom_abline(intercept = g_average[1], slope = g_average[2], color = "red", lwd = 2) +
   ylim(-3, 25)
 ```
 
-What is the average bias of $g$? That is, the average distance between E[g(x)] and f(x) where the average is taken over the distribution of x, which was uniform between xmin and xmax:
+This red line is the average of all 1,000 g's each fit in different universes. If we averaged infinite g's, we would get the mean, the E[G(x)] which is actually equal to hstar. This is proven in MATH 343. Thus, "bias" really measures f - hstar which is misspecification error. hstar is due to curlyH and if there is a lot of misspecification error we are underfitting. Hence:
+
+underfitting error = bias = misspecification error
+
+How to we estimate the bias of $g$? That is, the average distance between E[G(x)] and f(x) where the average is taken over the distribution of x, which was uniform between xmin and xmax:
 
 ```{r}
 x = seq(xmin, xmax, length.out = resolution)
@@ -119,6 +123,15 @@ plot_obj +
   geom_abline(intercept = g_average[1], slope = g_average[2], col = "red", lwd = 2) 
   # geom_line(data = f_x_df, aes(x, f), col = "green", size = 1)
 ```
+
+Each g model from each of the universes is one of those blue lines. They are not equal to the red line which once again is E[G(x)] = hstar. Hence the difference between a blue line to the red line is the estimation error. Thus variance is actually measuring how much estimation error there is. Hence
+
+
+variance = estimation error.
+
+If we are overfitting (i.e. we are using many degrees of freedom), then
+
+overfitting error = estimation error = variance
 
 Now calculate this average variance:
 
@@ -164,7 +177,7 @@ training_gs = matrix(NA, nrow = Nsim, ncol = 3)
 all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
 
 for (nsim in 1 : Nsim){
-  #simulate dataset $\mathbb{D}$
+  #simulate dataset $D$
   x_train = runif(n_train, xmin, xmax)
   delta_train = rnorm(n_train, 0, sigma)
   y_train = f(x_train) + delta_train
@@ -201,7 +214,9 @@ ggplot(f_x_df, aes(x, f)) +
   stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2}, col = "red")
 ```
 
-Not much! What is the average bias of $g$?
+Nearly zero! Should be actually zero if we had infinite number of simulated models. Why? There's no misspecification error.
+
+What is the average bias of $g$?
 
 ```{r}
 x = seq(xmin, xmax, length.out = resolution)
@@ -227,7 +242,7 @@ plot_obj +
   #geom_line(data = f_x_df, aes(x, f), col = "green", size = 0.5) 
 ```
 
-Not so much variance.
+Not so much variance either.
 
 Now calculate this average variance:
 
@@ -264,7 +279,7 @@ training_gs = matrix(NA, nrow = Nsim, ncol = 6)
 all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
 
 for (nsim in 1 : Nsim){
-  #simulate dataset $\mathbb{D}$
+  #simulate dataset $D$
   x_train = runif(n_train, xmin, xmax)
   delta_train = rnorm(n_train, 0, sigma)
   y_train = f(x_train) + delta_train
@@ -289,9 +304,7 @@ mse = mean(c(all_residuals)^2)
 mse
 ```
 
-Much higher! Why? 
-
-Variance went up!
+Much higher! Why? We'll see...
 
 Let's visualize the bias
 
@@ -304,7 +317,7 @@ ggplot(f_x_df, aes(x, f)) +
   stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2 + g_average[4] * x^3 + g_average[5] * x^4 + g_average[6] * x^5}, col = "red")
 ```
 
-Not much! Now compute the average bias squared of $g$:
+Again, there's no bias since there's an hstar in curlyH which is exactly f. Now compute the average bias squared of $g$:
 
 ```{r}
 x = seq(xmin, xmax, length.out = resolution)
@@ -314,7 +327,7 @@ expe_bias_g_sq = mean(biases^2)
 expe_bias_g_sq
 ```
 
-This appears to have increased over last time by a nominal amount ... but it's only because we're not running the regression infinite times. Remember this "expectation" is only an average.
+This appears to have increased over last time by a nominal amount ... but it's only because we're not running the regression infinite times. Remember this "expectation" is estimated with a finite average.
 
 What is the variance? Let's look at all lines:
 
@@ -373,8 +386,8 @@ n_train = 100
 n_test = 500
 xmin = 0
 xmax = 10
-sigma = 0.2
-Nsim = 250
+sigma = 0.5
+Nsim = 250 #trees take longer to build than OLS models so for practical reasons, our nsim is lower here so it won't be as exact as before
 ```
 
 And load the tree package:
@@ -388,8 +401,6 @@ Now let's generate lots of different datasets and fit many regression tree model
 
 ```{r}
 training_gs = list() #storing entire objects - need a hash
-Nsim = 200 #trees take longer to build than OLS models
-sigma = 1
 all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
 
 #go back to the sine curve example from class when we introduced the tree model
@@ -397,7 +408,7 @@ f = function(x){5 * sin(x)}
 
 for (nsim in 1 : Nsim){
   cat ("nsim", nsim, "of", Nsim, "\n")
-  #simulate dataset $\mathbb{D}$
+  #simulate dataset $D$
   x_train = runif(n_train, xmin, xmax)
   delta_train = rnorm(n_train, 0, sigma)
   y_train = f(x_train) + delta_train
@@ -458,7 +469,9 @@ ggplot(data.frame(x = x, f = f(x), expe_g = g_avg_x)) +
   geom_line(aes(x, f), col = "green", lwd = 1)
 ```
 
-Not much! Now actually compute the average bias squared of $g$:
+Not much! Again, the curlyH of trees is a really flexible basis for functions and thus trees can fit almost any true $f$ function! The default tree at N_0 = 5 overfits. That overfitting gives us very little bias. 
+
+Now actually compute the average bias squared of $g$ to verify:
 
 ```{r}
 biases = f(x) - g_avg_x
@@ -466,11 +479,7 @@ expe_bias_g_sq = mean(biases^2)
 expe_bias_g_sq
 ```
 
-This is small - why??
-
-It's because trees are so expressive and have such model complexity that they can nail almost any true $f$ function! The default tree at N_0 = 5 overfits. That overfitting gives us very little bias.
-
-That means the MSE save the irreducible noise is coming from the variance. Let's look at the variance vs f(x):
+Near zero. That means the MSE save the irreducible noise is coming from the variance. Let's look at the variance vs f(x):
 
 ```{r}
 plot_obj = ggplot(data.frame(x = x)) + 
@@ -532,17 +541,17 @@ ggplot(data.frame(x = x_train, y = y_train)) + geom_point(aes(x, y))
 
 Spend a moment to appreciate that this is all we're going to have. There is a lot of irreducible noise that is going to prevent us from finding the sine curve.
 
-Now we create 250 bootstrap samples to create similiar but different datasets and fit 250 tree models:
+Now we create 500 bootstrap samples to create similiar but different datasets and fit a tree model in each sample. Why only 500? Well, we don't have time for more. But we want as many as possible as we decrease the variance term as the number of bootstrap sample-trees increases.
 
 ```{r}
-bootstrapped_gs = list() #storing entire objects - need a hash / list object
+M = 500 #the number of tree models which will be each fit on a different bootstrap sample
 
-num_trees = 250 #M = num_trees
-for (t in 1 : num_trees){ 
+bootstrapped_gs = list()
+for (t in 1 : M){ 
   #fit a model g | x's, delta's and save it
   bootstrap_indices_t = sample(1 : n_train, replace = TRUE)
   g_model = YARFCART(data.frame(x = x_train[bootstrap_indices_t]), y_train[bootstrap_indices_t], 
-                     calculate_oob_error = FALSE) #this is confusing! But will become clear later...
+                     calculate_oob_error = FALSE) #this argument will become clear later...
   bootstrapped_gs[[t]] = g_model
 }
 ```
@@ -555,11 +564,11 @@ x = seq(xmin, xmax, length.out = resolution)
 
 #create the bagged model predictions
 g_bagged = array(0, resolution)
-for (t in 1 : num_trees){
+for (t in 1 : M){
   g_t = bootstrapped_gs[[t]]
   g_bagged = g_bagged + predict(g_t, data.frame(x = x))
 }
-g_bagged = g_bagged / num_trees #average of all models
+g_bagged = g_bagged / M #average of all models
 
 #now plot
 ggplot(data.frame(x = x, f = f(x), g_bagged = g_bagged)) + 
@@ -574,19 +583,19 @@ We just compared one tree to a bagged-tree (i.e. average of many trees where eac
 We fit the bag of trees before manually with a for loop. But of course there is a convenience to do this, the function `YARFBAG`. And then we run the same simulation as we did above with one tree.
 
 ```{r}
-Nsim = 250
 training_gs = list() #storing entire objects - need a hash
 all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
 
 for (nsim in 1 : Nsim){
-  #simulate dataset $\mathbb{D}$
+  cat ("nsim", nsim, "of", Nsim, "\n")
+  #simulate dataset $D$
   x_train = runif(n_train, xmin, xmax)
   delta_train = rnorm(n_train, 0, sigma)
   y_train = f(x_train) + delta_train
   # ggplot(data.frame(x = x, y = y), aes(x, y)) + geom_point(lwd=0.6) 
   
   #fit a model bagged tree g | x's, delta's and save it
-  g_model = YARFBAG(data.frame(x = x_train), y_train, num_trees = num_trees, calculate_oob_error = FALSE) #automatically does the bootstrap internally
+  g_model = YARFBAG(data.frame(x = x_train), y_train, num_trees = M, calculate_oob_error = FALSE, verbose = FALSE) #automatically does the bootstrap internally
   training_gs[[nsim]] = g_model
   
   #generate oos dataset and save residuals on oos data
@@ -747,7 +756,7 @@ Whole lot of room to improve! That RMSE improvement comes from effectively remov
 Now the diamonds data:
 
 ```{r}
-n_train = 1000
+n_train = 5000
 
 training_indices = sample(1 : nrow(diamonds), n_train)
 diamonds_train = diamonds[training_indices, ]
@@ -768,7 +777,7 @@ y_hat_test_lin = predict(mod_lin, X_test)
 oos_rmse_lin = sd(y_test - y_hat_test_lin)
 oos_rmse_lin
 
-mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+mod_bag = YARFBAG(X_train, y_train, num_trees = 500, calculate_oob_error = FALSE)
 y_hat_test_bag = predict(mod_bag, X_test)
 oos_rmse_bag = sd(y_test - y_hat_test_bag)
 oos_rmse_bag
@@ -782,13 +791,13 @@ That's a pretty bg improvement... and it's even more shocking that...
 summary(mod_lin)$r.squared
 ```
 
-There was seemingly not a whole lot of room to improve! But there is when you measure error in RMSE. That last 7% of unexplained variance means (1) a whole lot of RMSE and (2) that whole lot of RMSE is split between bias and irreducible error due to unknown information. But it did the best it can. It is likely what's remaining is due to information we don't measure.
+There was seemingly not a whole lot of room to improve! But there is when you measure error in RMSE. That last 7% of unexplained variance means (1) a whole lot of RMSE and (2) that whole lot of RMSE is split between bias and irreducible error due to unknown information. But it did the best it can. It is likely what's remaining is mostly due to delta = information we don't have access to in the columns of X.
 
 # Validation in Bagging?
 
 We are using the "bootstrap" to get the trees. Can we do model validation in the same step? 
 
-The answer is yes. For every tree, there was a bootstrap sample of the training set used to build the tree. But there are observations in $\mathbb{D}$ that are not in the bootstrap sample! About 1/3 on average are left out i.e. "out of bag (oob)". Over many trees, there are different oob subsets than become the full data set. So you actually have validation in a way on the whole dataset kind of like K-fold cross validation. Supposedly this validation is similar to K=2 in terms of performance. It is what everyone seems to use. 
+The answer is yes. For every tree, there was a bootstrap sample of the training set used to build the tree. But there are observations in $D$ that are not in the bootstrap sample! About 1/3 on average are left out i.e. "out of bag (oob)". Over many trees, there are different oob subsets than become the full data set. So you actually have validation in a way on the whole dataset kind of like K-fold cross validation. Supposedly this validation is similar to K=2 in terms of performance. It is what everyone seems to use. 
 
 Let's load the data and packages from last class and plot the data:
 
@@ -816,14 +825,15 @@ bagged_tree_mod
 How did this work? Let's look at the oob sets of indices:
 
 ```{r}
-cat("bootstrap indices:")
+cat("bootstrap indices 1st tree:\n")
 sort(bagged_tree_mod$bootstrap_indices[[1]])
-cat("oob:")
+cat("oob indices 1st tree:\n")
 sort(setdiff(1 : n_train, bagged_tree_mod$bootstrap_indices[[1]]))
-cat("bootstrap indices:")
+cat("bootstrap indices 2nd tree:\n")
 sort(bagged_tree_mod$bootstrap_indices[[2]])
-cat("oob:")
+cat("oob indices 2nd tree:\n")
 sort(setdiff(1 : n_train, bagged_tree_mod$bootstrap_indices[[2]]))
+cat("average of all y's oob for all i = 1,...,n:\n")
 bagged_tree_mod$y_oob
 
 n_oob = sapply(1 : n_train, function(i){sum(unlist(lapply(bagged_tree_mod$bootstrap_indices, function(set){!(i %in% set)})))})
@@ -863,11 +873,136 @@ s_e_bag = sd(y_test - y_hat_test_bag)
 s_e_bag
 
 #build and validate on all the data at once!
-mod_bag_all = YARFBAG(boston[, !"medv"], boston$medv, num_trees = num_trees, seed = seed)
-mod_bag_all$rmse_oob
+YARFBAG(X_train, y_train, num_trees = num_trees, seed = seed)
 ```
 
 There is a lot of variation, but theoretically, they should be about the same. 
 
 What do we have now? We now have model selection done within training. And training and validation are done in a single step! No more costly K-fold CV with 3 splits!
+
+
+# Random Forests
+
+Can we do any better? YES. As you saw, the variance terms can be shrunk further the more decorrelated the trees become. We do this now by introducing randomness into the splits by choosing only a subset of the features to split on randomly. The trees are then grown as normal. Then the we model average many trees via bagging. And that's random forests!
+
+Quick demo with the diamonds and oob validation:
+
+```{r}
+options(java.parameters = "-Xmx4000m")
+pacman::p_load(YARF, tidyverse, magrittr)
+rm(list = ls())
+
+seed = 1984
+set.seed(seed)
+n_samp = 2000
+#note: trees are perfect for ordinal variables! Since it only needs an ordering to do the splits
+#and thus it is immune to different encodings so, just use the standard 1, 2, 3, ...
+#thus there is no need here to cast the ordinal variables cut, color, clarity to nominal variables
+diamonds_samp = ggplot2::diamonds %>% sample_n(n_samp)
+y = diamonds_samp$price
+X = diamonds_samp %>% dplyr::select(-price)
+
+num_trees = 1000
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+mod_bag
+
+#now for apples-apples, build the RF on the same bootstrap data for each tree
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed, bootstrap_indices = mod_bag$bootstrap_indices)
+mod_rf
+
+# pacman::p_load(randomForest)
+# mod_rf = randomForest(X, y, num_trees = num_trees)
+# mod_rf
+
+cat("gain: ", (mod_bag$rmse_oob - mod_rf$rmse_oob) / mod_bag$rmse_oob * 100, "%\n")
+```
+
+This was a fail. RF is sensitive to the number of features samples (the hyperparameter mtry). Really, this hyperparameter should be selected using a grid search. We will do this on lab. Here is an example using the best value of `mtry`:
+
+
+```{r}
+#there are 9 total features
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed, bootstrap_indices = mod_bag$bootstrap_indices, mtry = 8)
+mod_rf
+
+cat("gain: ", (mod_bag$rmse_oob - mod_rf$rmse_oob) / mod_bag$rmse_oob * 100, "%\n")
+```
+
+This gain is not so impressive. But it is real (as we showed theoretically) and it's for free... so why not take it?
+
+If `mtry` is small, the gain may be so small in the rho-multiple on the variance term that it doesn't outweigh the increase in bias. Thus, we underfit a little bit. Thus it's better to stay with just bagging. Here it is on the boston housing data:
+
+```{r}
+rm(list = ls())
+y = MASS::Boston$medv
+X = MASS::Boston
+X$medv = NULL
+seed = 1984
+num_trees = 1000
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+mod_bag
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed, bootstrap_indices = mod_bag$bootstrap_indices, mtry = 11)
+mod_rf
+cat("oob rmse gain:", round((mod_bag$rmse_oob - mod_rf$rmse_oob) / mod_bag$rmse_oob * 100, 3), "%\n")
+```
+
+Slightly more impressive. But again it is for free. 
+
+What about for classification models?
+
+```{r}
+rm(list = ls())
+pacman::p_load_gh("coatless/ucidata")
+n_samp = 2000
+
+seed = 1984
+set.seed(seed)
+adult_samp = na.omit(adult) %>% sample_n(n_samp)
+y = adult_samp$income %>% factor
+X = adult_samp %>% dplyr::select(-income)
+
+num_trees = 500
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+#default mtry for classification models is floor(sqrt(p))
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed, bootstrap_indices = mod_bag$bootstrap_indices) #keep the bootstrap samples the same for an apples:apples comparison
+mod_bag$misclassification_error
+mod_rf$misclassification_error
+
+cat("gain: ", (mod_bag$misclassification_error - mod_rf$misclassification_error) / mod_bag$misclassification_error * 100, "%\n")
+```
+
+Very nice... and can likely be improved with optimizing mtry.
+
+And on letters:
+
+```{r}
+rm(list = ls())
+pacman::p_load(mlbench, skimr)
+data(LetterRecognition)
+LetterRecognition = na.omit(LetterRecognition) #kill any observations with missingness
+#skim(LetterRecognition)
+?LetterRecognition
+
+n_samp = 2000
+seed = 1984
+set.seed(seed)
+letters_samp = LetterRecognition %>% sample_n(n_samp)
+y = letters_samp$lettr
+X = letters_samp %>% dplyr::select(-lettr)
+
+num_trees = 500
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+
+#default mtry for classification models is floor(sqrt(p))
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed, bootstrap_indices = mod_bag$bootstrap_indices) #keep the bootstrap samples the same for an apples:apples comparison 
+mod_bag$misclassification_error
+mod_rf$misclassification_error
+
+cat("gain: ", (mod_bag$misclassification_error - mod_rf$misclassification_error) / mod_bag$misclassification_error * 100, "%\n")
+```
+
+Very nice again... and can likely be improved with optimizing mtry.
+
+There are very real gains for RF over bagging and these are most pronounced in classification models.
+
 
