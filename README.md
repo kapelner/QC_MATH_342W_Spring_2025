@@ -13,9 +13,9 @@ My theory lectures are following my previous class notes (see [here](https://git
 ## Labs
 
 <!--
-* [Lab 11, due 5/11](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab11.Rmd) pushed to your github repo
+* [Lab 11, due 5/11](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab11.Rmd) pushed to your github repo -->
 * [Lab 10, due 5/4](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab10.Rmd) pushed to your github repo
-* [Lab 9, due 4/27](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab09.Rmd) pushed to your github repo -->
+* [Lab 9, due 4/27](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab09.Rmd) pushed to your github repo
 * [Lab 8, due 4/23](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab08.Rmd) pushed to your github repo
 * [Lab 7, due 4/6](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab07.Rmd) pushed to your github repo
 * [Lab 6, due 3/30](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/labs/lab06.Rmd) pushed to your github repo
@@ -28,8 +28,8 @@ My theory lectures are following my previous class notes (see [here](https://git
 
 ## Theory Homeworks
 
-<!-- 
-* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf) (due 5/15 pushed to your github repo)-->
+<!-- -->
+* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw05/hw05t.pdf) (due 5/16 6PM pushed to your github repo)
 * Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw04/hw04t.pdf) (due 4/21 11:59PM pushed to your github repo)
 * Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw03/hw03t.pdf) (due 3/19 6PM pushed to your github repo)
 * Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2025/blob/master/homeworks/hw02/hw02t.pdf) (due 2/28 noon pushed to your github repo)

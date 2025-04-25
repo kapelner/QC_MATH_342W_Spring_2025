@@ -5,6 +5,68 @@ output: pdf_document
 ---
 
 
+# Asymmetric Cost Modeling, ROC and DET curves
+
+Fit a logistic regression model to the adult_train missingness-imputed data.
+
+```{r}
+rm(list = setdiff(ls(), "adult_train"))
+#TO-DO
+```
+
+Use the function from class to calculate all the error metrics (misclassification error, precision, recall, F1, FDR, FOR) for the values of the probability threshold being 0.001, 0.002, ..., 0.999 in a tibble (dplyr data frame).
+
+```{r}
+pacman::p_load(tidyverse)
+asymmetric_predictions_results = tibble(
+  p_hat_threshold = seq(from = 0.001, to = 0.999, by = 0.001),
+  misclassification_error = NA, 
+  precision = NA, 
+  recall = NA, 
+  F1 = NA, 
+  FDR = NA, 
+  FOR = NA
+)
+#TO-DO
+```
+
+Calculate the column `total_cost` and append it to this data frame via `mutate`.
+
+```{r}
+#TO-DO
+```
+
+Which is the lowest total cost? What is the "winning" probability threshold value providing that minimum total cost?
+
+```{r}
+#TO-DO
+```
+
+Plot an ROC curve and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Calculate AUC and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Plot a DET curve and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+
 
 # Missing Data
 

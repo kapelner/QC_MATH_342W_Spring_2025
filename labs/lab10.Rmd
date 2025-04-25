@@ -6,7 +6,7 @@ output: pdf_document
 
 #YARF
 
-For the next couple of labs, I want you to make some use of a package I wrote that offers convenient and flexible tree-building and random forest-building. Make sure you have a JDK installed first
+For the next couple of labs, I want you to make some use of a package I wrote that offers convenient and flexible tree-building and random forest-building. Make sure you have RTools installed (if you're on windows) and then a JDK installed:
 
 https://www.oracle.com/java/technologies/downloads/
 
@@ -32,6 +32,92 @@ pacman::p_load(YARF)
 
 Please try to fix the error messages (if they exist) as best as you can. I can help on slack.
 
+# Regression Trees
+
+You can use the `YARF` package if it works, otherwise, use the `randomForest` package (the canonical R package for this algorithm).
+
+Let's take a look at a simulated sine curve. Below is the code for the data generating process:
+
+```{r}
+rm(list = ls())
+n = 500
+sigma = 0.3
+x_min = 0
+x_max = 10
+x = runif(n, x_min, x_max)
+
+f_x = function(x){sin(x)}
+x = runif(n, x_min, x_max)
+y = f_x(x) + rnorm(n, 0, sigma)
+```
+
+Provide the bias-variance decomposition of this DGP fit with the tree model fitted with the optimal N_0 from the previous lab. It is a lot of code, but it is in the practice lectures. If your three numbers don't add up within two significant digits, increase your resolution.
+
+```{r}
+#TO-DO
+```
+
+# Classification Trees
+
+Let's get the letter recognition data from the `mlbench` package.
+
+```{r}
+rm(list = ls())
+pacman::p_load(mlbench)
+data(LetterRecognition, package = "mlbench")
+n = nrow(LetterRecognition)
+skimr::skim(LetterRecognition)
+```
+
+This dataset has 20,000 examples. Create a training-select-test split so that they each have 1,000 observations.
+
+```{r}
+train_idx = sample(1 : n, 1000)
+select_idx = sample(setdiff(1 : n, train_idx), 1000)
+test_idx = sample(setdiff(1 : n, c(train_idx, select_idx)), 1000)
+letters_train = LetterRecognition[train_idx, ]
+letters_select = LetterRecognition[select_idx, ]
+letters_test = LetterRecognition[test_idx, ]
+```
+
+Find the optimal classification tree by using the model selection algorithm to optimize the nodesize hyperparameter. Use misclassification error as the performance metric.
+
+```{r}
+nodesizes = seq(1, 200, by = 10)
+misclassification_errs = array(NA, length(nodesizes))
+#TO-DO
+```
+
+Plot the oos misclassification error by nodesize.
+
+```{r}
+ggplot(data.frame(nodesize = nodesizes, misclassification_error = misclassification_errs)) + 
+  aes(x = nodesize, misclassification_error = misclassification_error) +
+  geom_point() + 
+  geom_line()
+```
+
+Construct the optimal classification tree on train and select sets. Then estimate generalization error. Save `y_hat_test` as we'll need it later.
+
+```{r}
+tree_mod_opt = #TO-DO
+```
+
+Print out the top of the tree so we can have some level of interpretation to how the model g is predicting.
+
+```{r}
+illustrate_trees(tree_mod_opt, max_depth = 5, length_in_px_per_half_split = 30, open_file = TRUE)
+```
+
+Create a "confusion matrix". This means it shows every predicted level (which is a letter in our case) and every actual level. Here you'll see every type of error e.g. "P was predicted but the real letter is H", "M was predicted but the real letter is N" etc. This is really easy: one call to the `table` function is all you need.
+
+```{r}
+#TO-DO
+```
+
+Which errors are most prominent in this model?
+
+#TO-DO
 
 #Bagged Trees and Random Forest
 
@@ -93,7 +179,7 @@ Plot oob s_e by mtry.
 #TO-DO
 ```
 
-Take a sample of n = 2000 observations from the adult data and name it `adult_sample`. Then impute missing values using missForest.
+Take a sample of n = 2000 observations from the adult data and name it `adult_sample`. Then impute missing values using missForest (we will cover what this is later in.
 
 ```{r}
 rm(list = ls())
@@ -164,65 +250,3 @@ fp_cost =
 fn_cost = 
 #TO-DO
 ```
-
-# Asymmetric Cost Modeling, ROC and DET curves
-
-Fit a logistic regression model to the adult_train missingness-imputed data.
-
-```{r}
-rm(list = setdiff(ls(), "adult_train"))
-#TO-DO
-```
-
-Use the function from class to calculate all the error metrics (misclassification error, precision, recall, F1, FDR, FOR) for the values of the probability threshold being 0.001, 0.002, ..., 0.999 in a tibble (dplyr data frame).
-
-```{r}
-pacman::p_load(tidyverse)
-asymmetric_predictions_results = tibble(
-  p_hat_threshold = seq(from = 0.001, to = 0.999, by = 0.001),
-  misclassification_error = NA, 
-  precision = NA, 
-  recall = NA, 
-  F1 = NA, 
-  FDR = NA, 
-  FOR = NA
-)
-#TO-DO
-```
-
-Calculate the column `total_cost` and append it to this data frame via `mutate`.
-
-```{r}
-#TO-DO
-```
-
-Which is the lowest total cost? What is the "winning" probability threshold value providing that minimum total cost?
-
-```{r}
-#TO-DO
-```
-
-Plot an ROC curve and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
-Calculate AUC and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
-Plot a DET curve and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
