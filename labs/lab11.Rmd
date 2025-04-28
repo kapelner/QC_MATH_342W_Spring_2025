@@ -7,10 +7,30 @@ output: pdf_document
 
 # Asymmetric Cost Modeling, ROC and DET curves
 
+Load the adult dataset and impute the missing data using the `missForest` package.
+
+```{r}
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+n = nrow(adult)
+
+pacman::p_load(missForest)
+#TO-DO
+```
+
+Then sample training and testing sets each of size 2,000:
+
+```{r}
+n_subset = 2000
+index_train = sample.int(n, n_subset, replace = FALSE)
+index_test = setdiff(1 : n, n_subset)
+#TO-DO
+```
+
+
 Fit a logistic regression model to the adult_train missingness-imputed data.
 
 ```{r}
-rm(list = setdiff(ls(), "adult_train"))
 #TO-DO
 ```
 
@@ -42,7 +62,7 @@ Which is the lowest total cost? What is the "winning" probability threshold valu
 #TO-DO
 ```
 
-Plot an ROC curve and interpret.
+Plot an ROC curve in-sample and interpret.
 
 ```{r}
 #TO-DO
@@ -50,7 +70,7 @@ Plot an ROC curve and interpret.
 
 #TO-DO interpretation
 
-Calculate AUC and interpret.
+Calculate AUC in-sample and interpret.
 
 ```{r}
 #TO-DO
@@ -58,7 +78,29 @@ Calculate AUC and interpret.
 
 #TO-DO interpretation
 
-Plot a DET curve and interpret.
+Plot a DET curve in-sample and interpret.
+
+```{r}
+#TO-DO
+```
+
+Plot an ROC curve oos and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Calculate AUC oos and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Plot a DET curve oos and interpret.
 
 ```{r}
 #TO-DO
@@ -69,7 +111,7 @@ Plot a DET curve and interpret.
 
 #Boosting
 
-We will make use of YARF so here' the boilerplate code.
+We will make use of YARF's tree-fitting method so here's the boilerplate code to load it once again:
 
 ```{r}
 options(java.parameters = "-Xmx8000m")
