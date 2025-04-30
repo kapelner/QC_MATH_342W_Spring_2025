@@ -72,6 +72,7 @@ skimr::skim(LetterRecognition)
 This dataset has 20,000 examples. Create a training-select-test split so that they each have 1,000 observations.
 
 ```{r}
+set.seed(1)
 train_idx = sample(1 : n, 1000)
 select_idx = sample(setdiff(1 : n, train_idx), 1000)
 test_idx = sample(setdiff(1 : n, c(train_idx, select_idx)), 1000)
@@ -83,21 +84,24 @@ letters_test = LetterRecognition[test_idx, ]
 Find the optimal classification tree by using the model selection algorithm to optimize the nodesize hyperparameter. Use misclassification error as the performance metric.
 
 ```{r}
-nodesizes = seq(1, 200, by = 10)
+nodesizes = seq(1, 50, by = 1)
 misclassification_errs = array(NA, length(nodesizes))
-#TO-DO
+for (m in 1 : length(nodesizes)){
+  tree_mod = YARFCART(letters_train[, -1], letters_train[, 1], nodesize = nodesizes[m])
+  misclassification_errs[m] = mean(letters_select[, 1] != predict(tree_mod, letters_select[, -1]))
+}
 ```
 
 Plot the oos misclassification error by nodesize.
 
 ```{r}
 ggplot(data.frame(nodesize = nodesizes, misclassification_error = misclassification_errs)) + 
-  aes(x = nodesize, misclassification_error = misclassification_error) +
+  aes(x = nodesize, y = misclassification_error) +
   geom_point() + 
   geom_line()
 ```
 
-Construct the optimal classification tree on train and select sets. Then estimate generalization error. Save `y_hat_test` as we'll need it later.
+Construct the optimal classification tree on the union of train set and select set. Then estimate generalization error on test set. Save `y_hat_test` as we'll need it later.
 
 ```{r}
 tree_mod_opt = #TO-DO
@@ -137,14 +141,30 @@ Using the diamonds data, find the oob s_e for a bagged-tree model using 1, 2, 5,
 ```{r}
 num_trees_values = c(1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000)
 oob_se_bagged_trees_mod_by_num_trees = array(NA, length(num_trees_values))
-#TO-DO
+for (m in 1 : length(num_trees_values)){
+  tree_mod = YARFBAG(diamonds_train[, -7], diamonds_train[, 7, drop = TRUE], num_trees = num_trees_values[m])
+  oob_se_bagged_trees_mod_by_num_trees[m] = tree_mod$rmse_oob
+}
+
+ggplot(data.frame(num_trees = num_trees_values, oob_rmse = oob_se_bagged_trees_mod_by_num_trees)) + 
+  aes(x = num_trees, y = oob_rmse) +
+  geom_point() + 
+  geom_line()
 ```
 
 Find the bootstrap s_e for a RF model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. If you are using the `randomForest` package, you can calculate oob residuals via `e_oob = y_train - rf_mod$predicted`. Plot.
 
 ```{r}
 oob_se_rf_mod_by_num_trees = array(NA, length(num_trees_values))
-#TO-DO
+for (m in 1 : length(num_trees_values)){
+  tree_mod = YARF(diamonds_train[, -7], diamonds_train[, 7, drop = TRUE], num_trees = num_trees_values[m])
+  oob_se_rf_mod_by_num_trees[m] = tree_mod$rmse_oob
+}
+
+ggplot(data.frame(num_trees = num_trees_values, oob_rmse = oob_se_rf_mod_by_num_trees)) + 
+  aes(x = num_trees, y = oob_rmse) +
+  geom_point() + 
+  geom_line()
 ```
 
 What is the percentage gain / loss in performance of the RF model vs bagged trees model for each number of trees? Gains are negative (as in lower oos s_e).
