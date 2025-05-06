@@ -10,24 +10,22 @@ Load the adult data, split into training / test and build the logisitic prob est
 
 ```{r}
 rm(list = ls())
+pacman::p_load(data.table)
 pacman::p_load_gh("coatless/ucidata")
 data(adult)
-adult = na.omit(adult) #kill any observations with missingness
+adult = data.table(na.omit(adult)) #kill any observations with missingness
+adult[, income := ifelse(income == ">50K", 1, 0)]
 
-set.seed(1)
+set.seed(2)
 train_size = 5000
 train_indices = sample(1 : nrow(adult), train_size)
 adult_train = adult[train_indices, ]
 y_train = adult_train$income
-X_train = adult_train
-X_train$income = NULL
 
 test_size = 5000
 test_indices = sample(setdiff(1 : nrow(adult), train_indices), test_size)
 adult_test = adult[test_indices, ]
 y_test = adult_test$income
-X_test = adult_test
-X_test$income = NULL
 
 logistic_mod = glm(income ~ ., adult_train, family = "binomial")
 p_hats_train = predict(logistic_mod, adult_train, type = "response")
@@ -37,7 +35,7 @@ p_hats_test = predict(logistic_mod, adult_test, type = "response")
 Let's establish a rule: if the probability estimate is greater than or equal to 50%, let's classify the observation as positive, otherwise 0.
 
 ```{r}
-y_hats_train = factor(ifelse(p_hats_train >= 0.5, ">50K", "<=50K"))
+y_hats_train = factor(ifelse(p_hats_train >= 0.5, 1, 0))
 ```
 
 How did this "classifier" do in-sample?
@@ -73,7 +71,7 @@ cat("false_omission_rate", round(false_omission_rate * 100, 2), "%\n")
 That was in-sample which may be overfit. Howe about oos?
 
 ```{r}
-y_hats_test = factor(ifelse(p_hats_test >= 0.5, ">50K", "<=50K"))
+y_hats_test = factor(ifelse(p_hats_test >= 0.5, 1, 0))
 mean(y_hats_test != y_test)
 oos_conf_table = table(y_test, y_hats_test)
 oos_conf_table
@@ -110,7 +108,7 @@ However... this whole classifier hinged on the decision of the prob-threshold = 
 Let's establish a *new* rule: if the probability estimate is greater than or equal to 90%, let's classify the observation as positive, otherwise 0.
 
 ```{r}
-y_hats_test = factor(ifelse(p_hats_test >= 0.9, ">50K", "<=50K"))
+y_hats_test = factor(ifelse(p_hats_test >= 0.9, 1, 0))
 mean(y_hats_test != y_test)
 oos_conf_table = table(y_test, y_hats_test)
 oos_conf_table
@@ -180,10 +178,10 @@ compute_metrics_prob_classifier = function(p_hats, y_true, res = 0.001){
   n = length(y_true)
   for (i in 1 : length(p_thresholds)){
     p_th = p_thresholds[i]
-    y_hats = factor(ifelse(p_hats >= p_th, ">50K", "<=50K"))
+    y_hats = factor(ifelse(p_hats >= p_th, 1, 0))
     confusion_table = table(
-      factor(y_true, levels = c("<=50K", ">50K")),
-      factor(y_hats, levels = c("<=50K", ">50K"))
+      factor(y_true, levels = c(0, 1)),
+      factor(y_hats, levels = c(0, 1))
     )
       
     fp = confusion_table[1, 2]
@@ -219,8 +217,7 @@ compute_metrics_prob_classifier = function(p_hats, y_true, res = 0.001){
 Now let's generate performance results for the in-sample data:
 
 ```{r}
-pacman::p_load(data.table, magrittr)
-performance_metrics_in_sample = compute_metrics_prob_classifier(p_hats_train, y_train) %>% data.table
+performance_metrics_in_sample = data.table(compute_metrics_prob_classifier(p_hats_train, y_train))
 performance_metrics_in_sample
 ```
 
@@ -229,9 +226,10 @@ Now let's plot the ROC curve
 ```{r}
 pacman::p_load(ggplot2)
 ggplot(performance_metrics_in_sample) +
-  geom_line(aes(x = FPR, y = recall)) +
-  geom_abline(intercept = 0, slope = 1, col = "orange") + 
-  coord_fixed() + xlim(0, 1) + ylim(0, 1)
+  geom_line(aes(x = FPR, y = recall, col = p_th), lwd = 2) +
+  geom_abline(intercept = 0, slope = 1) + 
+  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
+  scale_colour_gradientn(colours = rainbow(5))
 ```
 
 
@@ -250,7 +248,7 @@ How do we do out of sample?
 
 
 ```{r}
-performance_metrics_oos = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+performance_metrics_oos = data.table(compute_metrics_prob_classifier(p_hats_test, y_test))
 performance_metrics_oos
 ```
 
@@ -276,14 +274,16 @@ ggplot(performance_metrics_in_and_oos) +
 
 Not bad at all - only a tad worse! In the real world it's usually a lot worse. We are lucky we have n = 5,000 in both a train and test set.
 
-# Detection Error Tradeoff curve
+# FDR-FOR Tradeoff curve
 
 ```{r}
 table(y_test) / length(y_test)
 table(y_train) / length(y_train)
 ggplot(performance_metrics_in_and_oos) +
-  geom_line(aes(x = FDR, y = miss_rate, col = sample)) +
-  coord_fixed() + xlim(0, 1) + ylim(0, 1)
+  geom_line(aes(x = FDR, y = FOR, col = sample)) +
+  coord_fixed() + 
+  xlim(0, max(performance_metrics_in_and_oos$FDR)) + 
+  ylim(0, max(performance_metrics_in_and_oos$FOR))
 ```
 
 What is the interpretation of this plot?
@@ -294,72 +294,40 @@ What is the interpretation of this plot?
 What would the effect be of less information on the same training set size? Imagine we didn't know the features: occupation, education, education_num, relationship, marital_status. How would we do relative to the above? Worse!
 
 ```{r}
-pacman::p_load(data.table, tidyverse, magrittr)
-if (!pacman::p_isinstalled(ucidata)){
-  pacman::p_load_gh("coatless/ucidata")
-} else {
-  pacman::p_load(ucidata)
-}
-
-data(adult)
-adult = na.omit(adult) #kill any observations with missingness
-
-set.seed(1)
-train_size = 5000
-train_indices = sample(1 : nrow(adult), train_size)
-adult_train = adult[train_indices, ]
-y_train = adult_train$income
-X_train = adult_train
-X_train$income = NULL
-
-test_size = 5000
-test_indices = sample(setdiff(1 : nrow(adult), train_indices), test_size)
-adult_test = adult[test_indices, ]
-y_test = adult_test$income
-X_test = adult_test
-X_test$income = NULL
-
-logistic_mod_full = glm(income ~ ., adult_train, family = "binomial")
-p_hats_test = predict(logistic_mod_full, adult_test, type = "response")
-
-performance_metrics_oos_full_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
-
 logistic_mod_red = glm(income ~ . - occupation - education - education_num - relationship - marital_status, adult_train, family = "binomial")
 p_hats_test = predict(logistic_mod_red, adult_test, type = "response")
-
-performance_metrics_oos_reduced_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+performance_metrics_oos_reduced = data.table(compute_metrics_prob_classifier(p_hats_test, y_test))
 
 
 ggplot(rbind(
-  performance_metrics_oos_full_mod[, model := "full"],
-  performance_metrics_oos_reduced_mod[, model := "reduced"]
+  performance_metrics_oos[, model := "full"],
+  performance_metrics_oos_reduced[, model := "reduced"]
 )) +
-  geom_point(aes(x = FPR, y = recall, shape = model, col = p_th), size = 1) +
+  geom_point(aes(x = FPR, y = recall, shape = model, col = model), size = 1) +
   geom_abline(intercept = 0, slope = 1) + 
-  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
-  scale_colour_gradientn(colours = rainbow(5))
+  coord_fixed() + xlim(0, 1) + ylim(0, 1)
 ```
 
 and we can see clearly that the AUC is worse. This means that the full model dominates the reduced model for every FPR / TPR pair.
 
 ```{r}
-pacman::p_load(pracma)
--trapz(performance_metrics_oos_reduced_mod$FPR, performance_metrics_oos_reduced_mod$recall)
--trapz(performance_metrics_oos_full_mod$FPR, performance_metrics_oos_full_mod$recall)
+-trapz(performance_metrics_oos_reduced$FPR, performance_metrics_oos_reduced$recall)
+-trapz(performance_metrics_oos$FPR, performance_metrics_oos$recall)
 ```
 
 As we lose information that is related to the true causal inputs, we lose predictive ability. Same story for this entire data science class since error due to ignorance increases! And certainly no different in probabilistic classifiers.
 
-Here's the same story with the DET curve:
+Here's the same story with the FDR-FOR curve:
 
 ```{r}
 ggplot(rbind(
-  performance_metrics_oos_full_mod[, model := "full"],
-  performance_metrics_oos_reduced_mod[, model := "reduced"]
+  performance_metrics_oos[, model := "full"],
+  performance_metrics_oos_reduced[, model := "reduced"]
 )) +
-  geom_point(aes(x = FDR, y = miss_rate, shape = model, col = p_th), size = 1) +
-  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
-  scale_colour_gradientn(colours = rainbow(5))
+  geom_point(aes(x = FDR, y = FOR, col = model), size = 1) +
+  coord_fixed() + 
+  xlim(0, max(c(performance_metrics_oos$FDR, performance_metrics_oos_reduced$FDR))) + 
+  ylim(0, max(c(performance_metrics_oos$FOR, performance_metrics_oos_reduced$FOR)))
 ```
 
 
@@ -380,17 +348,17 @@ Let's return to the linear logistic model with all features. Let's calculate the
 
 ```{r}
 n = nrow(adult_test)
-performance_metrics_oos_full_mod$avg_cost = 
-  (r_tp * performance_metrics_oos_full_mod$TP +
-  c_fp * performance_metrics_oos_full_mod$FP +
-  c_fn * performance_metrics_oos_full_mod$FN +
-  r_tn * performance_metrics_oos_full_mod$TN) / n
+performance_metrics_oos$avg_cost = 
+  (r_tp * performance_metrics_oos$TP +
+  c_fp * performance_metrics_oos$FP +
+  c_fn * performance_metrics_oos$FN +
+  r_tn * performance_metrics_oos$TN) / n
 ```
 
 Let's plot average reward (reward per person) by threshold:
 
 ```{r}
-ggplot(performance_metrics_oos_full_mod) +
+ggplot(performance_metrics_oos) +
   geom_line(aes(x = p_th, y = avg_cost)) #+
   # xlim(0, 0.05) + ylim(-5,0)
 ```
@@ -398,10 +366,10 @@ ggplot(performance_metrics_oos_full_mod) +
 Obviously, the best decision is $p_{th} \approx 0$ which means you classifiy almost everything as a positive. This makes sense because the mailing is so cheap. What are the performance characteristics of the optimal model?
 
 ```{r}
-i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
-performance_metrics_oos_full_mod[i_star, ]
+i_star = which.max(performance_metrics_oos$avg_cost)
+performance_metrics_oos[i_star, ]
 
-# performance_metrics_oos_full_mod[, .(p_th, avg_cost)]
+# performance_metrics_oos[, .(p_th, avg_cost)]
 ```
 
 The more interesting problem is where the cost of advertising is higher:
@@ -411,20 +379,20 @@ r_tp = 0
 c_fp = -200
 c_fn = -1000
 r_tn = 0
-performance_metrics_oos_full_mod$avg_cost = 
-  (r_tp * performance_metrics_oos_full_mod$TP +
-  c_fp * performance_metrics_oos_full_mod$FP +
-  c_fn * performance_metrics_oos_full_mod$FN +
-  r_tn * performance_metrics_oos_full_mod$TN) / n
-ggplot(performance_metrics_oos_full_mod) +
+performance_metrics_oos$avg_cost = 
+  (r_tp * performance_metrics_oos$TP +
+  c_fp * performance_metrics_oos$FP +
+  c_fn * performance_metrics_oos$FN +
+  r_tn * performance_metrics_oos$TN) / n
+ggplot(performance_metrics_oos) +
   geom_point(aes(x = p_th, y = avg_cost), lwd = 0.01)
 ```
 
 What are the performance characteristics of the optimal model?
 
 ```{r}
-i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
-performance_metrics_oos_full_mod[i_star, ]
+i_star = which.max(performance_metrics_oos$avg_cost)
+performance_metrics_oos[i_star, ]
 ```
 
 If $g_{pr}$ is closer to $f_{pr}$, what happens? 
@@ -441,26 +409,25 @@ There is also a way to make asymmetric cost models with trees. Let's load up the
 
 ```{r}
 rm(list = ls())
-options(java.parameters = "-Xmx4000m")
+options(java.parameters = "-Xmx8000m")
 pacman::p_load(YARF)
 pacman::p_load_gh("coatless/ucidata")
 data(adult)
-adult %<>% 
-  na.omit #kill any observations with missingness
+adult = data.table(na.omit(adult))
 ```
 
 Let's use samples of 2,000 to run experiments:
 
 ```{r}
-train_size = 2000
+train_size = 1000
 train_indices = sample(1 : nrow(adult), train_size)
 adult_train = adult[train_indices, ]
-y_train = adult_train$income
-X_train = adult_train %>% select(-income)
+y_train = ifelse(adult_train$income == ">50K", 1, 0)
+X_train = adult_train[, income := NULL]
 test_indices = setdiff(1 : nrow(adult), train_indices)
 adult_test = adult[test_indices, ]
-y_test = adult_test$income
-X_test = adult_test %>% select(-income)
+y_test = ifelse(adult_test$income == ">50K", 1, 0)
+X_test = adult_test[, income := NULL]
 ```
 
 What does the $y$'s look like?
@@ -475,7 +442,7 @@ Now make a regular RF and look at the oob confusion table and FDR and FOR:
 
 ```{r}
 num_trees = 500
-yarf_mod = YARF(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+yarf_mod = YARF(X_train, factor(y_train), num_trees = num_trees, calculate_oob_error = FALSE)
 y_hat_test = predict(yarf_mod, X_test)
 oos_confusion = table(y_test, y_hat_test)
 oos_confusion
@@ -486,19 +453,28 @@ cat("FOR =", oos_confusion[2, 1] / sum(oos_confusion[, 1]), "\n")
 High FDR rate and low FOR rate. Let's try to change this and reduce the FDR by oversampling 0's.
 
 ```{r}
-idx_0 = which(y_train == "<=50K")
+idx_0 = which(y_train == 0)
 n_0 = length(idx_0)
-idx_1 = which(y_train == ">50K")
+idx_1 = which(y_train == 1)
 n_1 = length(idx_1)
 
+over_or_under_sample_factor_0 = 2
+over_or_under_sample_factor_1 = 0.5
+
+over_or_under_sample_factor_0 * n_0
+over_or_under_sample_factor_1 * n_1
+```
+
+
+```{r}
 bootstrap_indices = list()
 for (m in 1 : num_trees){
   bootstrap_indices[[m]] = c( #note n_0' + n_1' doesn't equal n. You can make it so with one more line of code...
-    sample(idx_0, round(2.0 * n_0), replace = TRUE),
-    sample(idx_1, round(0.5 * n_1), replace = TRUE)
+    sample(idx_0, round(over_or_under_sample_factor_0 * n_0), replace = TRUE),
+    sample(idx_1, round(over_or_under_sample_factor_1 * n_1), replace = TRUE)
   )
 }
-yarf_mod_asymmetric = YARF(X_train, y_train, bootstrap_indices = bootstrap_indices, calculate_oob_error = FALSE)
+yarf_mod_asymmetric = YARF(X_train, factor(y_train), bootstrap_indices = bootstrap_indices, calculate_oob_error = FALSE)
 y_hat_test = predict(yarf_mod_asymmetric, X_test)
 oos_confusion = table(y_test, y_hat_test)
 oos_confusion
@@ -506,4 +482,4 @@ cat("FDR =", oos_confusion[1, 2] / sum(oos_confusion[, 2]), "\n")
 cat("FOR =", oos_confusion[2, 1] / sum(oos_confusion[, 1]), "\n")
 ```
 
-You can even vary the sampling and trace out ROC / DET curves. See function `YARFROC`.
+You can even vary the sampling and trace out ROC / FDR-FOR curves. See function `YARFROC`.

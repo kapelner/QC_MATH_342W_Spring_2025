@@ -84,7 +84,7 @@ letters_test = LetterRecognition[test_idx, ]
 Find the optimal classification tree by using the model selection algorithm to optimize the nodesize hyperparameter. Use misclassification error as the performance metric.
 
 ```{r}
-nodesizes = seq(1, 50, by = 1)
+nodesizes = seq(1, 20, by = 1)
 misclassification_errs = array(NA, length(nodesizes))
 for (m in 1 : length(nodesizes)){
   tree_mod = YARFCART(letters_train[, -1], letters_train[, 1], nodesize = nodesizes[m])
