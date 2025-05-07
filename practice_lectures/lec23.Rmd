@@ -1,5 +1,5 @@
 ---
-title: "Practice Lecture 22 MATH 342W Queens College"
+title: "Practice Lecture 23 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 ---
 
@@ -289,7 +289,6 @@ ggplot(performance_metrics_in_and_oos) +
 What is the interpretation of this plot?
 
 #Using AUC to Compare Probabilistic Classification Models
-
 
 What would the effect be of less information on the same training set size? Imagine we didn't know the features: occupation, education, education_num, relationship, marital_status. How would we do relative to the above? Worse!
 
