@@ -37,4 +37,81 @@ cat("RF var selected advantage over OLS:", round((rmse_ols - rmse_rf) / rmse_ols
 Why is that better than lasso? Because lasso is linear and in RF you get a bit of juice from the non-linearities and interactions. Why is it very slightly better than RF on the full data set? Because variable selection is a good "pre-step" to do sometimes. This is why in the real world there's usually a "pipeline" that cleans data, then variable selects, then fits model then validates.
 
 
+Boosting on large n - needs to be cv'd for hyperparams
 
+```{r}
+set.seed(1)
+diamonds = ggplot2::diamonds
+train_size = 20000
+train_indices = sample(setdiff(1 : nrow(diamonds), test_indices), train_size)
+
+test_size = 10000
+test_indices = sample(setdiff(1 : nrow(diamonds), train_indices), test_size)
+
+diamonds_train = diamonds[train_indices, ]
+y_train = diamonds_train$price
+X_train = diamonds_train
+X_train$price = NULL
+X_train_mm = diamonds_mm[train_indices, ]
+
+diamonds_test = diamonds[test_indices, ]
+y_test = diamonds_test$price
+X_test = diamonds_test
+X_test_mm = diamonds_mm[test_indices, ]
+X_test$price = NULL
+
+xgboost_mod = xgboost(
+ data = X_train_mm, #X: we need to convert it do a design matrix
+ label = y_train, #y
+ objective = "reg:squarederror", #SSE for a regression problem
+ booster = "gbtree",
+ #######hyperparameters
+ nrounds = 12000, #we need to increase this now as our n increased
+ eta = boosting_hyperparams$eta,
+ max_depth = boosting_hyperparams$max_depth,
+ subsample = boosting_hyperparams$subsample,
+ colsample_bytree = boosting_hyperparams$colsample_bytree,
+ nthread = boosting_hyperparams$nthread,
+ print_every_n = boosting_hyperparams$print_every_n
+)
+
+
+y_hat_test = predict(xgboost_mod, X_test_mm)
+cat("default boosting high n")
+cat("RMSE:", sqrt(sum((y_test - y_hat_test)^2)))
+```
+So I think we're overfitting in the first
+
+Invert train and test splits and let it train on ~20,000 observations.
+
+```{r}
+train_indices = setdiff(1 : nrow(adult), test_indices)
+adult_train = adult[train_indices, ]
+y_train = as.numeric(adult_train$income == ">50K")
+X_train = adult_train
+X_train$income = NULL
+X_train_mm = adult_mm[train_indices, ]
+nrow(X_train_mm)
+
+xgboost_mod = xgboost(
+ data = X_train_mm,
+ label = y_train,
+ objective = "binary:logistic",
+ #######hyperparameters
+ nrounds = 5000,
+ eta = boosting_hyperparams$eta,
+ max_depth = boosting_hyperparams$max_depth,
+ subsample = boosting_hyperparams$subsample,
+ colsample_bytree = boosting_hyperparams$colsample_bytree,
+ nthread = boosting_hyperparams$nthread,
+ print_every_n = boosting_hyperparams$print_every_n
+)
+
+y_hat_test = as.numeric(predict(xgboost_mod, X_test_mm) > 0.5) #default classification rule for probability regression
+oos_confusion = table(y_test, y_hat_test)
+oos_confusion
+cat("default boosting")
+cat("FDR =", oos_confusion[1, 2] / sum(oos_confusion[, 2]), "\n")
+cat("FOR =", oos_confusion[2, 1] / sum(oos_confusion[, 1]), "\n")
+cat("miscl err =", (oos_confusion[2, 1] + oos_confusion[1, 2]) / length(y_test), "\n")
+```
