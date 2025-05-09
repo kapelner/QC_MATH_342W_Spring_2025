@@ -161,8 +161,11 @@ qc_basement_gbm = function(X, y, g_base_learner_alg = NULL, neg_grad_objective_f
   assert_numeric(eta, lower = .Machine$double.eps)
   assert_logical(verbose)
   
+  g_0 = function(X_star){
+    #TO-DO
+  }
   if (identical(sort(names(table(y))), c("0", "1"))){
-    #classification
+    model_type = "probability_estimation"
     if (verbose){cat("building gradient boosted model for probability estimation of two classes\n")}
     if (is.null(M)){
       M = 100
@@ -172,11 +175,8 @@ qc_basement_gbm = function(X, y, g_base_learner_alg = NULL, neg_grad_objective_f
         #TO-DO
       }
     }
-    g_0 = function(X_star){
-      #TO-DO
-    }
   } else {
-    #regression
+    model_type = "regression"
     if (verbose){cat("building gradient boosted model for regression\n")}
     if (is.null(M)){
       M = 50
@@ -186,44 +186,29 @@ qc_basement_gbm = function(X, y, g_base_learner_alg = NULL, neg_grad_objective_f
         #TO-DO
       }
     }
-    g_0 = function(X_star){
-      #TO-DO
-    }
   }
 
-  g_tildes = list()
-  g_tilde_yhats = matrix(NA, nrow = n, ncol = M + 1) 
-  neg_gradient_ms = matrix(NA, nrow = n, ncol = M)
+  #these are the partial function fits where G_{t+1} = G_t + eta * gtilde_t
+  g_tildes = list() 
+  #this is the running tally of the sum of the yhats at each iteration
+  cumul_y_hat_m = #TO-DO 
   for (m in 1 : M) {
     if (verbose){cat("fitting base learner", m, "of", M, "\n")}
-    if (m == 1){
-      g_tilde_yhat_m = #TO-DO
-      cumul_y_hat_m = #TO-DO
-    } else {
-      g_tilde_yhat_m = #TO-DO
-      cumul_y_hat_m = #TO-DO
-    }
-    neg_gradient_m = #TO-DO
     g_tildes[[m]] = #TO-DO
-    neg_gradient_ms[, m] = neg_gradient_m
-    g_tilde_yhats[, m] = g_tilde_yhat_m
+    cumul_y_hat_m = cumul_y_hat_m + #TO-DO
   }
-  g_tilde_yhats[, M + 1] = predict(g_tildes[[M]], X)
   
   gbm = list(
     M = M, 
     eta = eta,
     X = X, 
     y = y, 
+    model_type = model_type,
     neg_grad_objective_function = neg_grad_objective_function, 
-    g_base_learner_alg = g_base_learner_alg, 
-    g_0 = g_0, 
-    neg_gradient_ms = neg_gradient_ms,
-    g_tildes = g_tildes, 
-    g_tilde_yhats = g_tilde_yhats
+    g_base_learner_alg = g_base_learner_alg,
+    g_0 = g_0,
+    g_tildes = g_tildes
   )
-  class(gbm) = "qc_basement_gbm"
-  gbm
 }
 
 #' Compute all iterative boosting predictions
