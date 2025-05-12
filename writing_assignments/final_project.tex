@@ -10,12 +10,12 @@
 \title{Math 342W Final Project \the\year}
 
 \author{Professor Adam Kapelner}
-\date{Writeup due May 26, 11:59PM by email}
+\date{Writeup due May 25, noon by email}
 
 \begin{document}
 \maketitle
 
-You will be writing a report about a prediction model for apartment selling prices in Queens, NY using the dataset found on github, \texttt{housing\_data\_2016\_2017.csv} where the outcome to be predicted is the column named \texttt{sale\_price}. This dataset is the \emph{raw data representation} found at \href{http://www.mlsli.com/}{MLSI}. The limitation on the data population for what \emph{you will be asked to predict} will be \qu{Queens, NY} as location and home types \qu{Condo / homeowner assoc.} and \qu{Co-op} up to a maximum sale price of \$1M sold between February, 2016 and February, 2017 and limited to the zip codes found in Table~\ref{tab:zips}. The dataset was harvested with \href{mturk.com}{Amazon's MTurk} and it is a raw download from their system.
+You will be writing a report about a prediction model for apartment selling prices in Queens, NY using the dataset found on github, \texttt{housing\_data\_2016\_2017.csv} where the outcome to be predicted is the column named \texttt{sale\_price}. This dataset is the \emph{raw data representation} found at \href{http://www.mlsli.com/}{MLSI}. The limitation on the data population for what \emph{you will be asked to predict} will be \qu{Queens, NY} as location and home types \qu{Condo / homeowner assoc.} and \qu{Co-op} up to a maximum sale price of \$1M sold between February, 2016 and February, 2017 and limited to the zip codes found in Table~\ref{tab:zipcodes}. The dataset was harvested with \href{mturk.com}{Amazon's MTurk} and it is a raw download from their system.
 
 
 \begin{table}[htp]
@@ -32,8 +32,8 @@ Southeast Queens		&11004& 11005& 11411& 11413& 11422& 11426& 11427& 11428& 11429
 Southwest Queens	&11414& 11415& 11416& 11417& 11418& 11419& 11420& 11421 \\
 West Queens			&11368& 11369& 11370& 11372& 11373& 11377& 11378 \\\hline
 \end{tabular}
-\label{tab:zips}
 \caption{The zip codes for the houses in the dataset. They call come from mainland Queens. We are leaving out the Rockaways, a peninsula near JFK airport that is geographically distinct from the rest of the neighborhoods.}
+\label{tab:zipcodes}
 \end{table}
 
 I picked this project because I know you can all do better than \url{zillow.com} who make their own secret-sauce predictions that they whimsically call \qu{zestimates}. However, in Queens, zestimates for apartments are quite lame but indeed have improved over the years. Their reported results for the NYC area as of 4/24/20 are below:
