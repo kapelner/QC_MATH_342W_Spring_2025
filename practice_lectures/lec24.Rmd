@@ -278,4 +278,3 @@ You should also try the following packages: catboost and lightgbm.
 
 I think the point of this demo is it's difficult to get an optimal model - there's lots of choices. Thus machine learning is part art and part science. I think that's a good final takeaway message for this whole course!
 
-
