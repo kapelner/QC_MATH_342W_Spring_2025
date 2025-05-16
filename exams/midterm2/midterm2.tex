@@ -207,7 +207,7 @@ The \texttt{tailnum} variable is a unique serial number for each airplane. Consi
 \subquestionwithpoints{3} How many rows will \texttt{flights\_with\_plane\_information} have? If the answer cannot be determined, write \qu{cannot be determined}. 
 
 \iftoggle{solutions}{\inred{
-328,521
+328,521 (or, if you read the question differently, cannot be determined)
 }}{~\spc{0}}
 
 
@@ -221,7 +221,7 @@ The \texttt{tailnum} variable is a unique serial number for each airplane. Consi
 If we left-join the \texttt{planes} data frame to the \texttt{flights} data frame, how many rows will the joined data frame have? If the answer cannot be determined, write \qu{cannot be determined}. 
 
 \iftoggle{solutions}{\inred{
-cannot be determined
+cannot be determined (or, if you read the question differently, 328,521)
 }}{~\spc{0}}
 
 \subquestionwithpoints{3} Assume we want to plot the density distribution of \texttt{arr\_delay} by plane \texttt{manufacturer} and automatically generate a legend in \texttt{ggplot}'s \texttt{geom\_density}. Provide four rows of an example input data frame for this operation below. \iftoggle{solutions}{\inred{We need to generate a few sample rows from the \textit{long} data frame derived from \texttt{flights\_with\_plane\_information} with metric variables \texttt{arr\_delay} and \texttt{manufacturer}:}}
@@ -295,7 +295,7 @@ Group variables            None
 \subquestionwithpoints{2} If we use $\X$ as the feature matrix to model, what information (that we have access to from the raw data frame) are we leaving out that might be important?
 
 \iftoggle{solutions}{\inred{
-The $\M$ matrix of missing dummy variables.
+The $\M$ matrix of missing dummy variables. Also \texttt{seats} could be an answer as well.
 }}{~\spc{0}}
 
 \subquestionwithpoints{3} What is the value of $p_{raw} + 1$? That is, if we were to consider the model \texttt{lm(y $\sim$ ., X)}, how many coefficients would it fit? Assume none of the features are collinear. If the answer cannot be determined, write \qu{cannot be determined}.
@@ -373,7 +373,13 @@ $\hat{y} = -19.278 + -8.321 + 0.017 * (1000) + 0.004 * (1000) = -6.599$
 \subquestionwithpoints{3} Using the above model, predict the delay for an Endeavor Air flight (\texttt{carrier} = 9E) leaving at 8PM (\texttt{sched\_dep\_time} = 2000) to three decimals. This carrier has 17,377 flights in the total dataset. If the answer cannot be determined, write \qu{cannot be determined}. 
 
 \iftoggle{solutions}{\inred{
-$\hat{y} = -19.278 + 0.017 * (1000) = -2.278$
+If you assumed 9E was the reference category, then the answer is 
+
+\beqn
+\hat{y} = -19.278 + 0.017 * (1000) = -2.278.
+\eeqn
+
+However since only 14 coefficients were given (due to one being dropped in the $\X_{train}$ sub dataset by mistake), the answer really \qu{cannot be determined}.
 }}{~\spc{2}}
 
 \pagebreak
@@ -664,7 +670,7 @@ We now compute the oos ROC curve for \texttt{logistic\_mod} and illustrate it be
 \subquestionwithpoints{1} Estimate the oos AUC.
 
 \iftoggle{solutions}{\inred{
-Since the upper triangle has area 0.5, I estimate the curve has about 15\% of the area, so I'm estimating 0.58.
+Since the upper triangle has area 0.5, I estimate the curve has about 15\% of the area, so I'm estimating 0.55-0.65.
 }}{~\spc{1.5}}
 
 \subquestionwithpoints{1} Circle one: the in-sample AUC is likely...  \\
