@@ -3,7 +3,7 @@
 \include{preamble}
 
 \newtoggle{solutions}
-%\toggletrue{solutions}
+\toggletrue{solutions}
 
 \newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
 
@@ -301,7 +301,8 @@ The $\M$ matrix of missing dummy variables. Also \texttt{seats} could be an answ
 \subquestionwithpoints{3} What is the value of $p_{raw} + 1$? That is, if we were to consider the model \texttt{lm(y $\sim$ ., X)}, how many coefficients would it fit? Assume none of the features are collinear. If the answer cannot be determined, write \qu{cannot be determined}.
 
 \iftoggle{solutions}{\inred{
-$p_{raw} + 1 = \underbrace{4}_{\text{numeric features}} + \underbrace{16-1}_{\text{carrier}} + \underbrace{3-1}_{\text{origin}} + \underbrace{104-1}_{\text{dest}} + \underbrace{121-1}_{\text{model}} + \underbrace{1}_{\text{intercept}} = 245$
+$p_{raw} + 1 = 9$ but if you interpreted the question differently you would get...\\
+$p + 1 = \underbrace{4}_{\text{numeric features}} + \underbrace{16-1}_{\text{carrier}} + \underbrace{3-1}_{\text{origin}} + \underbrace{104-1}_{\text{dest}} + \underbrace{121-1}_{\text{model}} + \underbrace{1}_{\text{intercept}} = 245$
 }}{~\spc{1.5}}
 
 \subquestionwithpoints{4} If we were to consider the model \texttt{lm(y $\sim$ . * ., X)}, what is the value of $p+1$? That is, how many coefficients would it fit? Assume none of the features are collinear. If the answer cannot be determined, write \qu{cannot be determined}. Advice: leave this problem for last as it is difficult!
@@ -599,8 +600,9 @@ Bias of \texttt{rf\_mod}   \iftoggle{solutions}{\inred{$?$}}{~\line(1,0){15}~}  
 
 Var of \texttt{rf\_mod}   \iftoggle{solutions}{\inred{$?$}}{~\line(1,0){15}~}     Var of \texttt{boost\_mod} \\
 
-MSE of \texttt{rf\_mod}   \iftoggle{solutions}{\inred{$?$}}{~\line(1,0){15}~}     MSE of \texttt{boost\_mod}
+MSE of \texttt{rf\_mod}   \iftoggle{solutions}{\inred{$?$}}{~\line(1,0){15}~}     MSE of \texttt{boost\_mod} \\
 
+\iftoggle{solutions}{\inred{= is also acceptable for the last question if you assume $M$ was optimized}}{}
 \pagebreak
 
 
